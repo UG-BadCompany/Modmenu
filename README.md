@@ -1,29 +1,25 @@
-## Family Fun Pack
+# BadCompany Modmenu
 
-### Summary
+BadCompany is a modern Fabric client rebuild of the legacy 1.12.2 Forge utility client. The old Forge/MCP implementation has been moved to `legacy/` for reference only and is excluded from compilation.
 
-Minecraft 1.12.2 utility mod for anarchy servers, 2b2t - 9b9t. This is not a complete anarchy utility mod, but instead offers a few features that are missing or are improved from what offer others utility mods.
+## Target Platform
 
-### Usage
-Use the ```backslash``` key to open the GUI (by default). Change it from Minecraft keybinds options.
+- Minecraft Java `1.21.11`
+- Fabric Loader `0.19.2`
+- Fabric API `0.141.4+1.21.11`
+- Fabric Loom `1.14.8`
+- Java `21`
+- Yarn mappings `1.21.11+build.3`
 
-### Features
-[Modules list](/modules.md)
+## Development
 
-[Commands list](/commands.md)
-
-### Disclaimer
-Most of these features are based on Minecraft network stack and do not work on singleplayer.
-
-### Running in a Dev Environment:
-```gradle
-gradlew setupDecompWorkspace
-gradlew runClient
+```bash
+./gradlew build
+./gradlew runClient
 ```
 
-### Compiling the client:
-```gradle
-gradlew setupDecompWorkspace
-gradlew build
-```
-You will find your built jar in the directory `builds/libs`.
+The default GUI keybind is backslash (`\\`) and can be changed from Minecraft's keybind settings. Client configuration is stored as JSON under `.minecraft/config/badcompany/client.json`.
+
+## Current Migration Status
+
+The first Fabric milestone focuses on a stable boot path, a configurable keybind, a modern ClickGUI shell, JSON configuration, chat command dispatch, and safe module registration. Legacy features that require deeper 1.21 packet/rendering hooks are represented as placeholders so the project remains compilable while preserving the feature map for future work.
