@@ -38,32 +38,35 @@ public final class ModuleButton {
         }
     }
 
-    public boolean mouseClicked(int relativeY, double mouseX, int x, int y, int width, int button) {
+    public boolean mouseClicked(int relativeY, int button) {
         if (relativeY < 0 || relativeY > fullHeight()) return false;
         if (relativeY <= HEIGHT) {
             if (button == 0) module.toggle();
             if (button == 1) expanded = !expanded;
             return true;
         }
-        if (expanded && button == 0) {
-            int index = (relativeY - HEIGHT) / 14;
-            if (index >= 0 && index < module.settings().size()) {
-                Setting<?> setting = module.settings().get(index);
-                if (setting instanceof BooleanSetting booleanSetting) {
-                    booleanSetting.toggle();
-                } else if (setting instanceof NumberSetting numberSetting) {
-                    double step = numberSetting.max() <= 10 ? 1.0D : 4.0D;
-                    double next = numberSetting.get() + (button == 1 ? -step : step);
-                    if (next > numberSetting.max()) next = numberSetting.min();
-                    if (next < numberSetting.min()) next = numberSetting.max();
-                    numberSetting.set(next);
-                } else if (setting instanceof ColorSetting colorSetting) {
-                    colorSetting.cycle();
-                }
-                return true;
-            }
+        if (!expanded || (button != 0 && button != 1)) return false;
+
+        int index = (relativeY - HEIGHT) / 14;
+        if (index < 0 || index >= module.settings().size()) return false;
+
+        Setting<?> setting = module.settings().get(index);
+        if (setting instanceof BooleanSetting booleanSetting) {
+            booleanSetting.toggle();
+        } else if (setting instanceof NumberSetting numberSetting) {
+            cycleNumber(numberSetting, button == 1);
+        } else if (setting instanceof ColorSetting colorSetting) {
+            colorSetting.cycle();
         }
-        return false;
+        return true;
+    }
+
+    private static void cycleNumber(NumberSetting setting, boolean backwards) {
+        double step = setting.max() <= 10 ? 1.0D : 4.0D;
+        double next = setting.get() + (backwards ? -step : step);
+        if (next > setting.max()) next = setting.min();
+        if (next < setting.min()) next = setting.max();
+        setting.set(next);
     }
 
     private static String displayValue(Setting<?> setting) {

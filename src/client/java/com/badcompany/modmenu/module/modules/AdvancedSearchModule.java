@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 
 public final class AdvancedSearchModule extends Module {
-    // TODO: Feed cachedTargets into a dedicated Fabric LevelRenderEvents render pipeline for boxes/tracers.
     private static final int MAX_RANGE = 48;
     private static final int DEFAULT_SCAN_BUDGET = 4096;
     private static final int MAX_CACHED_TARGETS = 1024;
@@ -39,17 +38,17 @@ public final class AdvancedSearchModule extends Module {
     ));
     private final ColorSetting highlightColor = addSetting(new ColorSetting(
             "Highlight color",
-            "ARGB color used by the renderer once the Fabric render pass is expanded.",
+            "ARGB color saved for cached search-target rendering.",
             0xFF55FFFF
     ));
     private final BooleanSetting showTracers = addSetting(new BooleanSetting(
             "Show tracers",
-            "Prepare cached targets for tracer rendering without sending packets.",
+            "Keep matching targets available to tracer-capable render integrations.",
             false
     ));
     private final BooleanSetting showBoxes = addSetting(new BooleanSetting(
             "Show boxes",
-            "Prepare cached targets for box highlighting.",
+            "Keep matching targets available for box highlighting integrations.",
             true
     ));
     private final NumberSetting rangeLimit = addSetting(new NumberSetting(

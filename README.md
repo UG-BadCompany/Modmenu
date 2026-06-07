@@ -1,58 +1,75 @@
 # BadCompany Modmenu
 
-BadCompany is a modern Fabric client rebuild of the legacy 1.12.2 Forge utility client. The old Forge/MCP implementation has been moved to `legacy/` for reference only and is excluded from compilation.
+BadCompany is a Minecraft `1.21.11` Fabric client utility mod. The post-migration codebase is Java 21-only, uses Yarn/Fabric APIs directly, and keeps the old Forge/MCP source tree isolated under `legacy/` for historical reference only; it is not part of the Gradle build.
 
 ## Target Platform
 
-- Minecraft Java `1.21.11`
-- Fabric Loader `0.19.3`
-- Fabric API `0.141.4+1.21.11`
-- Fabric Loom `1.14.8`
-- Java `21`
-- Yarn mappings `1.21.11+build.6`
+| Component | Version |
+| --- | --- |
+| Minecraft Java | `1.21.11` |
+| Fabric Loader | `0.19.3` |
+| Fabric API | `0.141.4+1.21.11` |
+| Fabric Loom | `1.14.8` |
+| Yarn mappings | `1.21.11+build.6` |
+| Java | `21` |
 
-## Development
+## Build Instructions
 
 ```bash
 ./gradlew build
-./gradlew runClient
 ```
 
-The default GUI keybind is backslash (`\\`) and can be changed from Minecraft's keybind settings. Client configuration is stored as JSON under `.minecraft/config/badcompany/client.json`.
+The compiled mod jar is written to `build/libs/`. Use a Java 21 JDK; older Java runtimes are unsupported.
 
-## Current Migration Status
+## Development Setup
 
-The Fabric 1.21.x migration is stable: the project has a Java 21 Gradle/Fabric Loom build path, GitHub Actions build coverage, a runClient smoke workflow, a module framework, JSON config, and ClickGUI. True Durability, Advanced Search, Book Formatting, Entity Trace, Stalker, Undead, Pig POV, and PumpkinAura are active or safe-behavior ports using 1.21.11 client APIs. Silent Close, Packet Canceler, Portal Invulnerability, and Bowbomb are safely stubbed/monitor-only where the original packet exploit behavior is no longer valid for modern Fabric without unsafe packet suppression.
+1. Install a Java 21 JDK.
+2. Clone the repository.
+3. Run `./gradlew build` to compile and remap the client jar.
+4. Run `./gradlew runClient` to launch the Fabric development client.
+5. Open the GUI in-game with the default backslash (`\`) keybind. The keybind can be changed in Minecraft's controls menu.
 
-## Migration Checklist
+Client configuration is saved as pretty-printed JSON at `.minecraft/config/badcompany/client.json` in the active run directory. Module enabled states, keybinds, settings, and ClickGUI panel positions are saved through the shared config manager.
 
-### Core Framework
+## Commands
 
-- [x] Fabric 1.21.x conversion
-- [x] Java 21
-- [x] Gradle/Fabric Loom build
-- [x] GitHub Actions build workflow
-- [x] runClient smoke workflow
-- [x] Module system
-- [x] Config system
-- [x] ClickGUI
-- [x] True Durability
+BadCompany chat commands use the `.` prefix:
 
-### Legacy Modules
+| Command | Description |
+| --- | --- |
+| `.help` | Lists available commands. |
+| `.modules` | Lists registered modules. |
+| `.toggle <module>` | Toggles a module by display name. |
+| `.bind <module> <key.translation.id>` | Binds a module to a Minecraft key translation id, such as `key.keyboard.g`. |
+| `.config save` | Saves the current configuration immediately. |
 
-Legend: **Fully ported** means the Fabric module provides the original safe client-side behavior. **Partially ported** means a modern equivalent exists but rendering/mixin expansion is still pending. **Safely stubbed** means exploit-heavy packet behavior is intentionally not reproduced; settings and monitor-mode behavior are saved through the modern config system.
+## Current Module List
 
-| Module | Status | Notes |
-| --- | --- | --- |
-| True Durability | Fully ported | Exact durability tooltip values use modern item components. |
-| Advanced Search | Partially ported | Block/state filtering and cached target scanning are active; dedicated render overlays remain pending. |
-| Book Formatting | Fully ported | Modern book-edit screen notices preserve safe formatting guidance. |
-| Silent Close | Safely stubbed | Tracks handled-screen closes and last container details without suppressing vanilla close packets. |
-| Packet Canceler | Safely stubbed | Saves packet filter lists in safe mode without dropping protocol traffic. |
-| Portal Invulnerability | Safely stubbed | Monitors portal contact and dimension transitions without withholding teleport confirmations. |
-| Pig POV | Fully ported | Pig riding switches to a safe first-person camera helper without changing entity dimensions. |
-| Entity Trace | Fully ported | Reports large entity movement jumps from the loaded client entity cache. |
-| Stalker | Fully ported | Tracks tab-list joins/leaves and gamemode changes through the modern player list API. |
-| Undead | Fully ported | Safely dismisses the death screen client-side without auto-respawn packets. |
-| Bowbomb | Safely stubbed | Detects normal charged bow releases and refuses legacy packet flooding. |
-| PumpkinAura | Partially ported | Uses normal vanilla interaction to place held pumpkins on legal supports with configurable safety gates; render overlay remains pending. |
+| Module | Category | Status | Notes |
+| --- | --- | --- | --- |
+| Advanced Search | Render | Partial safe port | Scans loaded client blocks with configurable block/state filters and caches matches for render integrations. |
+| Book Formatting | Player | Safe port | Prints a local formatting-code reminder when the modern book edit screen opens. |
+| Bowbomb | Exploit | Safe monitor | Detects normal charged bow releases and never sends packet-flood behavior. |
+| Entity Trace | Render | Safe port | Reports large entity position jumps from the loaded client entity cache. |
+| Packet Canceler | Exploit | Safe configuration module | Saves packet filter notes without dropping protocol traffic. |
+| Pig POV | Render | Safe port | Switches to first person while riding pigs and restores the previous perspective afterward. |
+| Portal Invulnerability | Exploit | Safe monitor | Reports portal contact and dimension changes while preserving vanilla teleport handling. |
+| PumpkinAura | World | Partial safe port | Places held pumpkins with normal vanilla interactions on legal supports and with configurable safety gates. |
+| Silent Close | Exploit | Safe monitor | Tracks handled-screen close transitions without suppressing vanilla close packets. |
+| Stalker | Player | Safe port | Watches tab-list joins, leaves, and game-mode changes using modern client state. |
+| True Durability | Render | Safe port | Adds exact durability and unbreakable markers to modern item tooltips. |
+| Undead | Player | Safe port | Dismisses the client death screen without sending automatic respawn packets. |
+
+## GitHub Actions
+
+The repository is expected to stay green on these workflows:
+
+- **Build**: runs `./gradlew build --stacktrace` and uploads `build/libs/*.jar`.
+- **Java CI with Gradle**: runs the Java 21 Gradle build as a second CI entrypoint.
+- **runClient Smoke Test**: launches `./gradlew --no-daemon runClient` under `xvfb` and waits for the BadCompany client initializer log line.
+
+## Migration Status
+
+The Minecraft `1.21.11` Fabric migration is complete. The production path now consists of a Java 21 Fabric Loom build, a Fabric client initializer, a module registry, ClickGUI, command manager, and JSON configuration persistence. Exploit-heavy packet behavior from the historical client has been replaced with safe client-side monitoring or configuration-only modules where direct behavior would be unsafe or inappropriate on modern servers.
+
+See [`MIGRATION_SUMMARY.md`](MIGRATION_SUMMARY.md) for the final migration summary, architecture notes, module status table, and known placeholders.

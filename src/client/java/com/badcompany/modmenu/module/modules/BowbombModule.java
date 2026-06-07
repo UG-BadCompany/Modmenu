@@ -9,7 +9,7 @@ import net.minecraft.text.Text;
 public final class BowbombModule extends Module {
     private final BooleanSetting notifyUnsafeRelease = addSetting(new BooleanSetting(
             "Release notices",
-            "Notify when a charged bow is released instead of sending legacy packet floods.",
+            "Notify when a charged bow is released instead of sending unsafe packet floods.",
             true
     ));
     private final BooleanSetting requireFullCharge = addSetting(new BooleanSetting(
@@ -22,7 +22,7 @@ public final class BowbombModule extends Module {
     private int lastUseTicks;
 
     public BowbombModule() {
-        super("Bowbomb", "Safe bow release monitor; the legacy packet burst exploit is intentionally not sent.", Category.EXPLOIT);
+        super("Bowbomb", "Safe bow release monitor; unsafe packet burst behavior is intentionally not sent.", Category.EXPLOIT);
     }
 
     @Override
@@ -48,7 +48,7 @@ public final class BowbombModule extends Module {
         if (wasUsingBow) {
             wasUsingBow = false;
             if (notifyUnsafeRelease.get() && (!requireFullCharge.get() || lastUseTicks >= 20)) {
-                client.player.sendMessage(Text.literal("[Bowbomb] Bow released normally. Legacy packet flooding is disabled in the Fabric port."), false);
+                client.player.sendMessage(Text.literal("[Bowbomb] Bow released normally. Unsafe packet flooding is disabled in the Fabric port."), false);
             }
             lastUseTicks = 0;
         }
