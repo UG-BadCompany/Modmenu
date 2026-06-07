@@ -1,0 +1,88 @@
+name: runClient Smoke Test
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/runclient-smoke.yml'
+      - 'build.gradle'
+      - 'gradle.properties'
+      - 'settings.gradle'
+      - 'gradle/**'
+      - 'src/client/**'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/runclient-smoke.yml'
+      - 'build.gradle'
+      - 'gradle.properties'
+      - 'settings.gradle'
+      - 'gradle/**'
+      - 'src/client/**'
+
+jobs:
+  runclient-smoke:
+    name: Launch Minecraft client with mod
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Set up virtual display
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
+
+      - name: Launch runClient until BadCompany initializes
+        shell: bash
+        run: |
+          set -euo pipefail
+          LOG_FILE="$RUNNER_TEMP/runclient.log"
+          touch "$LOG_FILE"
+
+          xvfb-run -a ./gradlew --no-daemon runClient >"$LOG_FILE" 2>&1 &
+          CLIENT_PID=$!
+
+          cleanup() {
+            if kill -0 "$CLIENT_PID" 2>/dev/null; then
+              kill "$CLIENT_PID" 2>/dev/null || true
+              wait "$CLIENT_PID" 2>/dev/null || true
+            fi
+          }
+          trap cleanup EXIT
+
+          for _ in {1..180}; do
+            if grep -q 'BadCompany initialized with' "$LOG_FILE"; then
+              echo 'BadCompany client initializer completed successfully.'
+              exit 0
+            fi
+
+            if ! kill -0 "$CLIENT_PID" 2>/dev/null; then
+              echo 'runClient exited before BadCompany initialized.' >&2
+              cat "$LOG_FILE" >&2
+              exit 1
+            fi
+
+            sleep 1
+          done
+
+          echo 'Timed out waiting for BadCompany initialization.' >&2
+          cat "$LOG_FILE" >&2
+          exit 1
+
+      - name: Upload runClient log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: runclient-log
+          path: ${{ runner.temp }}/runclient.log
+          if-no-files-found: ignore
