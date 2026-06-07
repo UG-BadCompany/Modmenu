@@ -69,10 +69,7 @@ public final class BadCompanyClient implements ClientModInitializer {
         for (Module module : MODULES.modules()) {
             InputUtil.Key key = module.keybind();
             if (key == null || key == InputUtil.UNKNOWN_KEY || key.getCategory() != InputUtil.Type.KEYSYM) continue;
-            boolean down = InputUtil.isKeyPressed(
-                    client.getWindow(),
-                    key.getCode()
-            );
+            boolean down = InputUtil.isKeyPressed(client.getWindow().getHandle(), key.getCode());
             if (down && pressedModuleKeys.add(key)) {
                 MODULES.handleKey(key);
             } else if (!down) {
