@@ -2,6 +2,8 @@ package com.badcompany.modmenu.gui;
 
 import com.badcompany.modmenu.module.Module;
 import com.badcompany.modmenu.settings.BooleanSetting;
+import com.badcompany.modmenu.settings.ColorSetting;
+import com.badcompany.modmenu.settings.NumberSetting;
 import com.badcompany.modmenu.settings.Setting;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -28,7 +30,8 @@ public final class ModuleButton {
             int settingY = y + HEIGHT;
             for (Setting<?> setting : module.settings()) {
                 context.fill(x + 4, settingY, x + width - 4, settingY + 13, 0x9021212A);
-                String value = setting.name() + ": " + setting.get();
+                String value = setting.name() + ": " + displayValue(setting);
+                if (value.length() > 30) value = value.substring(0, 27) + "...";
                 context.drawTextWithShadow(client.textRenderer, Text.literal(value), x + 8, settingY + 3, 0xFFCCCCCC);
                 settingY += 14;
             }
@@ -46,10 +49,26 @@ public final class ModuleButton {
             int index = (relativeY - HEIGHT) / 14;
             if (index >= 0 && index < module.settings().size()) {
                 Setting<?> setting = module.settings().get(index);
-                if (setting instanceof BooleanSetting booleanSetting) booleanSetting.toggle();
+                if (setting instanceof BooleanSetting booleanSetting) {
+                    booleanSetting.toggle();
+                } else if (setting instanceof NumberSetting numberSetting) {
+                    double step = numberSetting.max() <= 10 ? 1.0D : 4.0D;
+                    double next = numberSetting.get() + (button == 1 ? -step : step);
+                    if (next > numberSetting.max()) next = numberSetting.min();
+                    if (next < numberSetting.min()) next = numberSetting.max();
+                    numberSetting.set(next);
+                } else if (setting instanceof ColorSetting colorSetting) {
+                    colorSetting.cycle();
+                }
                 return true;
             }
         }
         return false;
+    }
+
+    private static String displayValue(Setting<?> setting) {
+        if (setting instanceof ColorSetting colorSetting) return colorSetting.hex();
+        if (setting instanceof NumberSetting numberSetting) return String.valueOf(Math.round(numberSetting.get()));
+        return String.valueOf(setting.get());
     }
 }
