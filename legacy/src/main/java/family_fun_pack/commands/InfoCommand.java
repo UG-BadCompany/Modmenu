@@ -69,7 +69,7 @@ public class InfoCommand extends Command implements PacketListener {
         default: dimension = "unknown";
       }
 
-      String stat = player.getGameProfile().getName() + "id[" + entity_id + "] (" + game_type + ") in " + dimension + "[" + world_type + "], " + difficulty;
+      String stat = player.getGameProfile().name() + "id[" + entity_id + "] (" + game_type + ") in " + dimension + "[" + world_type + "], " + difficulty;
       if(hardcore) stat += " [hardcore]";
       if(reduce_debug) stat += " [reduce debug info]";
       stat += " max players: " + max_players;

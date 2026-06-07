@@ -158,22 +158,22 @@ public abstract class AbstractPlayersRegister extends Module {
 
         Action action = this.thread.action;
         if(action == Action.INV) {
-          if(this.thread.module.containsUUID(profile.getId())) action = Action.DEL;
+          if(this.thread.module.containsUUID(profile.id())) action = Action.DEL;
           else action = Action.ADD;
         }
 
         switch(action) {
           case ADD:
-            if(this.thread.module.addUUID(profile.getId()))
-              FamilyFunPack.printMessage(String.format("%s added to %s list", profile.getName(), this.thread.module.list_name));
+            if(this.thread.module.addUUID(profile.id()))
+              FamilyFunPack.printMessage(String.format("%s added to %s list", profile.name(), this.thread.module.list_name));
             else
-              FamilyFunPack.printMessage(String.format("%s alread present in %s list", profile.getName(), this.thread.module.list_name));
+              FamilyFunPack.printMessage(String.format("%s alread present in %s list", profile.name(), this.thread.module.list_name));
             break;
           case DEL:
-            if(this.thread.module.delUUID(profile.getId()))
-              FamilyFunPack.printMessage(String.format("%s removed from %s list", profile.getName(), this.thread.module.list_name));
+            if(this.thread.module.delUUID(profile.id()))
+              FamilyFunPack.printMessage(String.format("%s removed from %s list", profile.name(), this.thread.module.list_name));
             else
-              FamilyFunPack.printMessage(String.format("%s is not in %s list", profile.getName(), this.thread.module.list_name));
+              FamilyFunPack.printMessage(String.format("%s is not in %s list", profile.name(), this.thread.module.list_name));
             break;
         }
         this.thread.module.save(configuration);

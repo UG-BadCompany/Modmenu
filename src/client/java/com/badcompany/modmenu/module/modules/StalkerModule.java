@@ -56,7 +56,7 @@ public final class StalkerModule extends Module {
 
         Set<UUID> seen = new HashSet<>();
         for (PlayerListEntry entry : client.getNetworkHandler().getPlayerList()) {
-            UUID uuid = entry.getProfile().getId();
+            UUID uuid = entry.getProfile().id();
             seen.add(uuid);
             PlayerSnapshot current = PlayerSnapshot.from(entry);
             PlayerSnapshot previous = players.put(uuid, current);
@@ -85,7 +85,7 @@ public final class StalkerModule extends Module {
     private record PlayerSnapshot(String name, String gameMode) {
         static PlayerSnapshot from(PlayerListEntry entry) {
             String mode = entry.getGameMode() == null ? "unknown" : entry.getGameMode().asString();
-            return new PlayerSnapshot(entry.getProfile().getName(), mode);
+            return new PlayerSnapshot(entry.getProfile().name(), mode);
         }
     }
 }
