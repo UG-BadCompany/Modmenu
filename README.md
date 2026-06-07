@@ -1,16 +1,16 @@
 # BadCompany Modmenu
 
-BadCompany is a Minecraft `1.21.11` Fabric client utility mod. The post-migration codebase is Java 21-only, uses Yarn/Fabric APIs directly, and keeps the old Forge/MCP source tree isolated under `legacy/` for historical reference only; it is not part of the Gradle build.
+BadCompany is a Minecraft `1.21.9` through `1.21.x` Fabric client utility mod. The post-migration codebase is Java 21-only, uses Yarn/Fabric APIs directly, and keeps the old Forge/MCP source tree isolated under `legacy/` for historical reference only; it is not part of the Gradle build.
 
 ## Target Platform
 
 | Component | Version |
 | --- | --- |
-| Minecraft Java | `1.21.11` |
+| Minecraft Java | `>=1.21.9 <1.22` |
 | Fabric Loader | `0.19.3` |
-| Fabric API | `0.141.4+1.21.11` |
+| Fabric API | `0.134.1+1.21.9` |
 | Fabric Loom | `1.14.8` |
-| Yarn mappings | `1.21.11+build.6` |
+| Yarn mappings | `1.21.9+build.1` |
 | Java | `21` |
 
 ## Build Instructions
@@ -19,7 +19,7 @@ BadCompany is a Minecraft `1.21.11` Fabric client utility mod. The post-migratio
 ./gradlew build
 ```
 
-The compiled mod jar is written to `build/libs/`. Use a Java 21 JDK; older Java runtimes are unsupported.
+The compiled mod jar is written to `build/libs/`. Use a Java 21 JDK; older Java runtimes are unsupported. The lower bound is Minecraft 1.21.9 because the active ClickGUI uses the 1.21.9+ client input APIs (`Click`, `KeyInput`, and `CharInput`), so 1.21.4 and earlier are not declared compatible.
 
 ## Development Setup
 
@@ -70,6 +70,6 @@ The repository is expected to stay green on these workflows:
 
 ## Migration Status
 
-The Minecraft `1.21.11` Fabric migration is complete. The production path now consists of a Java 21 Fabric Loom build, a Fabric client initializer, a module registry, ClickGUI, command manager, and JSON configuration persistence. Exploit-heavy packet behavior from the historical client has been replaced with safe client-side monitoring or configuration-only modules where direct behavior would be unsafe or inappropriate on modern servers.
+The Minecraft `1.21.9+` Fabric migration is complete. The production path now consists of a Java 21 Fabric Loom build, a Fabric client initializer, a module registry, ClickGUI, command manager, and JSON configuration persistence. Exploit-heavy packet behavior from the historical client has been replaced with safe client-side monitoring or configuration-only modules where direct behavior would be unsafe or inappropriate on modern servers.
 
 See [`MIGRATION_SUMMARY.md`](MIGRATION_SUMMARY.md) for the final migration summary, architecture notes, module status table, and known placeholders.
