@@ -34,7 +34,13 @@ public final class CategoryPanel {
     public int x() { return x; }
     public int y() { return y; }
     public boolean expanded() { return expanded; }
-    public void apply(ConfigManager.PanelConfig config) { if (config != null) { x = config.x; y = config.y; expanded = config.expanded; } }
+
+    public void apply(ConfigManager.PanelConfig config) {
+        if (config == null) return;
+        x = config.x;
+        y = config.y;
+        expanded = config.expanded;
+    }
 
     public void render(DrawContext context, int mouseX, int mouseY, String search, int screenHeight) {
         MinecraftClient client = MinecraftClient.getInstance();
@@ -63,7 +69,11 @@ public final class CategoryPanel {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         if (mouseX < x || mouseX > x + WIDTH || mouseY < y) return false;
         if (mouseY <= y + HEADER_HEIGHT) {
-            if (button == 0) { dragging = true; dragX = (int) mouseX - x; dragY = (int) mouseY - y; }
+            if (button == 0) {
+                dragging = true;
+                dragX = (int) mouseX - x;
+                dragY = (int) mouseY - y;
+            }
             if (button == 1) expanded = !expanded;
             return true;
         }
@@ -71,7 +81,7 @@ public final class CategoryPanel {
         int currentY = y + HEADER_HEIGHT + scroll;
         for (ModuleButton moduleButton : buttons) {
             int h = moduleButton.fullHeight() + 2;
-            if (mouseY >= currentY && mouseY <= currentY + h) return moduleButton.mouseClicked((int) mouseY - currentY, mouseX, x, currentY, WIDTH, button);
+            if (mouseY >= currentY && mouseY <= currentY + h) return moduleButton.mouseClicked((int) mouseY - currentY, button);
             currentY += h;
         }
         return false;

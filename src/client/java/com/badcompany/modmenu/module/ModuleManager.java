@@ -34,6 +34,9 @@ public final class ModuleManager {
     }
 
     public void registerDefaults() {
+        modules.clear();
+        byCategory.clear();
+
         register(new TrueDurabilityModule());
         register(new AdvancedSearchModule());
         register(new BookFormattingModule());
@@ -48,6 +51,7 @@ public final class ModuleManager {
         register(new PumpkinAuraModule());
         modules.sort(Comparator.comparing(Module::name));
         byCategory.values().forEach(list -> list.sort(Comparator.comparing(Module::name)));
+        validateRegistration();
     }
 
     public void register(Module module) {
@@ -81,6 +85,16 @@ public final class ModuleManager {
 
     public void saveSoon() {
         if (configManager != null) configManager.saveSafely();
+    }
+
+    private void validateRegistration() {
+        for (Category category : Category.values()) {
+            byCategory.computeIfAbsent(category, ignored -> new ArrayList<>());
+        }
+        long uniqueNames = modules.stream().map(module -> normalize(module.name())).distinct().count();
+        if (uniqueNames != modules.size()) {
+            throw new IllegalStateException("Duplicate BadCompany module names are not allowed");
+        }
     }
 
     private static String normalize(String text) {

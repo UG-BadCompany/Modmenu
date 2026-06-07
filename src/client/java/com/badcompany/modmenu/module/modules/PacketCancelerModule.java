@@ -14,12 +14,12 @@ import java.util.stream.Collectors;
 public final class PacketCancelerModule extends Module {
     private final StringSetting clientboundWatchList = addSetting(new StringSetting(
             "Clientbound watch list",
-            "Comma separated packet class names to document for a future audited mixin hook.",
+            "Comma separated clientbound packet class names kept for audit notes.",
             ""
     ));
     private final StringSetting serverboundWatchList = addSetting(new StringSetting(
             "Serverbound watch list",
-            "Comma separated packet class names to document for a future audited mixin hook.",
+            "Comma separated serverbound packet class names kept for audit notes.",
             ""
     ));
     private final BooleanSetting notifyChat = addSetting(new BooleanSetting(

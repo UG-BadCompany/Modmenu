@@ -66,7 +66,7 @@ public final class PumpkinAuraModule extends Module {
     ));
     private final ColorSetting renderColor = addSetting(new ColorSetting(
             "Render color",
-            "Saved highlight color for a future Fabric render pass.",
+            "Saved highlight color for safe placement previews.",
             0xFFFFAA00
     ));
 

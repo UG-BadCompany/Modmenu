@@ -3,11 +3,15 @@ plugins {
     id 'maven-publish'
 }
 
-version = project.mod_version
-group = project.maven_group
+def modVersion = providers.gradleProperty('mod_version')
+def mavenGroup = providers.gradleProperty('maven_group')
+def archiveBaseName = providers.gradleProperty('archives_base_name')
+
+version = modVersion.get()
+group = mavenGroup.get()
 
 base {
-    archivesName = project.archives_base_name
+    archivesName = archiveBaseName.get()
 }
 
 loom {
@@ -40,10 +44,10 @@ dependencies {
 }
 
 tasks.withType(ProcessResources).configureEach {
-    inputs.property 'version', project.version
+    inputs.property 'version', modVersion
 
     filesMatching('fabric.mod.json') {
-        expand 'version': project.version
+        expand 'version': modVersion.get()
     }
 }
 
@@ -58,16 +62,16 @@ java {
 }
 
 jar {
-    inputs.property 'archivesName', project.base.archivesName
+    inputs.property 'archivesName', archiveBaseName
     from('LICENSE.txt') {
-        rename { "${it}_${inputs.properties.archivesName}" }
+        rename { fileName -> "${fileName}_${archiveBaseName.get()}" }
     }
 }
 
 publishing {
     publications {
         create('mavenJava', MavenPublication) {
-            artifactId = project.archives_base_name
+            artifactId = archiveBaseName.get()
             from components.java
         }
     }
