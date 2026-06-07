@@ -2,6 +2,7 @@ package com.badcompany.modmenu.module.modules;
 
 import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.Module;
+import com.badcompany.modmenu.module.ModuleStatus;
 import com.badcompany.modmenu.settings.StringSetting;
 
 public final class ClientCommandsModule extends Module {
@@ -12,7 +13,7 @@ public final class ClientCommandsModule extends Module {
     ));
 
     public ClientCommandsModule() {
-        super("FFP Commands", "Enables the legacy Family Fun Pack-style client command prefix.", Category.MISC, true);
+        super("FFP Commands", "Enables the legacy Family Fun Pack-style client command prefix.", Category.MISC, ModuleStatus.WORKING, true);
     }
 
     public String prefix() {

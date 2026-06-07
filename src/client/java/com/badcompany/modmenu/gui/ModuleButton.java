@@ -1,6 +1,8 @@
 package com.badcompany.modmenu.gui;
 
+import com.badcompany.modmenu.config.ConfigManager;
 import com.badcompany.modmenu.module.Module;
+import com.badcompany.modmenu.module.ModuleStatus;
 import com.badcompany.modmenu.settings.BooleanSetting;
 import com.badcompany.modmenu.settings.ColorSetting;
 import com.badcompany.modmenu.settings.NumberSetting;
@@ -10,45 +12,60 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 
 public final class ModuleButton {
-    public static final int HEIGHT = 18;
+    private static final int BASE_HEIGHT = 13;
     private final Module module;
     private boolean expanded;
 
     public ModuleButton(Module module) { this.module = module; }
     public Module module() { return module; }
     public boolean expanded() { return expanded; }
-    public int fullHeight() { return HEIGHT + (expanded ? module.settings().size() * 14 : 0); }
 
-    public void render(DrawContext context, int x, int y, int width, int mouseX, int mouseY) {
+    public int fullHeight(ConfigManager configManager) {
+        return height(configManager) + (expanded ? module.settings().size() * settingHeight(configManager) : 0);
+    }
+
+    public void render(DrawContext context, int x, int y, int width, int mouseX, int mouseY, ConfigManager configManager) {
         MinecraftClient client = MinecraftClient.getInstance();
-        boolean hovered = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + HEIGHT;
-        int background = module.enabled() ? 0xF05D44D6 : hovered ? 0xF02D2D3A : 0xEA202028;
-        context.fill(x - 1, y, x + width + 1, y + HEIGHT, 0xFF050507);
-        context.fill(x, y, x + width, y + HEIGHT, background);
-        context.drawTextWithShadow(client.textRenderer, module.name(), x + 6, y + 5, module.enabled() ? 0xFFFFFFFF : 0xFFF1F1F1);
-        context.drawTextWithShadow(client.textRenderer, expanded ? "−" : "+", x + width - 12, y + 5, 0xFFE0E0E0);
+        int height = height(configManager);
+        int accent = configManager.accentColor();
+        boolean hovered = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
+        int background = module.enabled() ? withAlpha(accent, 0xCC) : hovered ? 0xCC222222 : 0x99000000;
+        if (module.status() == ModuleStatus.UNSAFE_DISABLED) background = hovered ? 0xCC331111 : 0x99180000;
+
+        context.fill(x, y, x + width, y + height, background);
+        drawBorder(context, x, y, width, height, module.enabled() ? accent : 0xFFBBBBBB);
+        int labelColor = module.status() == ModuleStatus.UNSAFE_DISABLED ? 0xFFFFB0B0 : 0xFFEEEEEE;
+        context.drawText(client.textRenderer, module.name(), x + 4, y + 3, labelColor, false);
+
+        String status = compactStatus(module.status());
+        int statusWidth = client.textRenderer.getWidth(status);
+        int statusColor = module.status().color();
+        context.drawText(client.textRenderer, status, x + width - statusWidth - 14, y + 3, statusColor, false);
+        context.drawText(client.textRenderer, expanded ? "-" : "+", x + width - 9, y + 3, 0xFFEEEEEE, false);
+
         if (expanded) {
-            int settingY = y + HEIGHT;
+            int settingY = y + height;
             for (Setting<?> setting : module.settings()) {
-                context.fill(x + 4, settingY, x + width - 4, settingY + 13, 0xE021212A);
+                context.fill(x + 2, settingY, x + width - 2, settingY + settingHeight(configManager), 0xCC111111);
                 String value = setting.name() + ": " + displayValue(setting);
-                if (value.length() > 34) value = value.substring(0, 31) + "...";
-                context.drawTextWithShadow(client.textRenderer, Text.literal(value), x + 8, settingY + 3, 0xFFE7E7E7);
-                settingY += 14;
+                int maxChars = Math.max(18, (width - 12) / 6);
+                if (value.length() > maxChars) value = value.substring(0, maxChars - 3) + "...";
+                context.drawText(client.textRenderer, Text.literal(value), x + 5, settingY + 2, 0xFFD8D8D8, false);
+                settingY += settingHeight(configManager);
             }
         }
     }
 
-    public boolean mouseClicked(int relativeY, int button) {
-        if (relativeY < 0 || relativeY > fullHeight()) return false;
-        if (relativeY <= HEIGHT) {
+    public boolean mouseClicked(int relativeY, int button, ConfigManager configManager) {
+        if (relativeY < 0 || relativeY > fullHeight(configManager)) return false;
+        if (relativeY <= height(configManager)) {
             if (button == 0) module.toggle();
             if (button == 1) expanded = !expanded;
             return true;
         }
         if (!expanded || (button != 0 && button != 1)) return false;
 
-        int index = (relativeY - HEIGHT) / 14;
+        int index = (relativeY - height(configManager)) / settingHeight(configManager);
         if (index < 0 || index >= module.settings().size()) return false;
 
         Setting<?> setting = module.settings().get(index);
@@ -60,6 +77,36 @@ public final class ModuleButton {
             colorSetting.cycle();
         }
         return true;
+    }
+
+    private static int height(ConfigManager configManager) {
+        int base = configManager.compactMode() ? BASE_HEIGHT : 16;
+        return Math.max(11, (int) Math.round(base * configManager.guiScale()));
+    }
+
+    private static int settingHeight(ConfigManager configManager) {
+        int base = configManager.compactMode() ? 11 : 13;
+        return Math.max(10, (int) Math.round(base * configManager.guiScale()));
+    }
+
+    private static String compactStatus(ModuleStatus status) {
+        return switch (status) {
+            case WORKING -> "Working";
+            case PARTIAL -> "Partial";
+            case PLACEHOLDER -> "Place";
+            case UNSAFE_DISABLED -> "Unsafe";
+        };
+    }
+
+    private static int withAlpha(int argb, int alpha) {
+        return (alpha << 24) | (argb & 0x00FFFFFF);
+    }
+
+    private static void drawBorder(DrawContext context, int x, int y, int width, int height, int color) {
+        context.fill(x, y, x + width, y + 1, color);
+        context.fill(x, y, x + 1, y + height, color);
+        context.fill(x, y + height - 1, x + width, y + height, color);
+        context.fill(x + width - 1, y, x + width, y + height, color);
     }
 
     private static void cycleNumber(NumberSetting setting, boolean backwards) {

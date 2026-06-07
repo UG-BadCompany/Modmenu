@@ -11,8 +11,7 @@ import java.util.List;
 import java.util.Locale;
 
 public final class CategoryPanel {
-    private static final int HEADER_HEIGHT = 22;
-    private static final int WIDTH = 154;
+    private static final int BASE_HEADER_HEIGHT = 16;
     private final Category category;
     private final List<ModuleButton> buttons = new ArrayList<>();
     private int x;
@@ -43,35 +42,41 @@ public final class CategoryPanel {
         expanded = config.expanded;
     }
 
-    public void render(DrawContext context, int mouseX, int mouseY, String search, int screenHeight) {
+    public void render(DrawContext context, int mouseX, int mouseY, String search, int screenHeight, ConfigManager configManager) {
         MinecraftClient client = MinecraftClient.getInstance();
         lastSearch = search == null ? "" : search;
+        int width = width(configManager);
+        int headerHeight = headerHeight(configManager);
+        int accent = configManager.accentColor();
         if (dragging) {
             x = mouseX - dragX;
             y = mouseY - dragY;
         }
-        x = Math.max(4, Math.min(x, Math.max(4, MinecraftClient.getInstance().getWindow().getScaledWidth() - WIDTH - 4)));
-        y = Math.max(4, Math.min(y, Math.max(4, screenHeight - HEADER_HEIGHT - 4)));
-        context.fill(x - 1, y - 1, x + WIDTH + 1, y + HEADER_HEIGHT + 1, 0xFF050507);
-        context.fill(x, y, x + WIDTH, y + HEADER_HEIGHT, 0xF21A1A22);
-        context.fill(x, y + HEADER_HEIGHT - 2, x + WIDTH, y + HEADER_HEIGHT, 0xFF7C4DFF);
-        context.drawTextWithShadow(client.textRenderer, category.displayName(), x + 7, y + 7, 0xFFFFFFFF);
-        context.drawTextWithShadow(client.textRenderer, expanded ? "▾" : "▸", x + WIDTH - 14, y + 7, 0xFFFFFFFF);
+        x = Math.max(4, Math.min(x, Math.max(4, client.getWindow().getScaledWidth() - width - 4)));
+        y = Math.max(4, Math.min(y, Math.max(4, screenHeight - headerHeight - 4)));
+
+        context.fill(x, y, x + width, y + headerHeight, 0xD8000000);
+        drawBorder(context, x, y, width, headerHeight, accent);
+        context.drawText(client.textRenderer, category.displayName(), x + 5, y + 4, 0xFFEEEEEE, false);
+        context.drawText(client.textRenderer, expanded ? "-" : "+", x + width - 10, y + 4, 0xFFEEEEEE, false);
         if (!expanded) return;
-        int contentY = y + HEADER_HEIGHT + scroll;
-        int clipBottom = screenHeight - 8;
-        context.enableScissor(x, y + HEADER_HEIGHT, x + WIDTH, clipBottom);
+
+        int contentY = y + headerHeight + scroll;
+        int clipBottom = screenHeight - 6;
+        context.enableScissor(x, y + headerHeight, x + width, clipBottom);
         for (ModuleButton button : buttons) {
             if (!matches(button, search)) continue;
-            button.render(context, x, contentY, WIDTH, mouseX, mouseY);
-            contentY += button.fullHeight() + 2;
+            button.render(context, x, contentY, width, mouseX, mouseY, configManager);
+            contentY += button.fullHeight(configManager) + 1;
         }
         context.disableScissor();
     }
 
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (mouseX < x || mouseX > x + WIDTH || mouseY < y) return false;
-        if (mouseY <= y + HEADER_HEIGHT) {
+    public boolean mouseClicked(double mouseX, double mouseY, int button, ConfigManager configManager) {
+        int width = width(configManager);
+        int headerHeight = headerHeight(configManager);
+        if (mouseX < x || mouseX > x + width || mouseY < y) return false;
+        if (mouseY <= y + headerHeight) {
             if (button == 0) {
                 dragging = true;
                 dragX = (int) mouseX - x;
@@ -81,21 +86,37 @@ public final class CategoryPanel {
             return true;
         }
         if (!expanded) return false;
-        int currentY = y + HEADER_HEIGHT + scroll;
+        int currentY = y + headerHeight + scroll;
         for (ModuleButton moduleButton : buttons) {
             if (!matches(moduleButton, lastSearch)) continue;
-            int h = moduleButton.fullHeight() + 2;
-            if (mouseY >= currentY && mouseY <= currentY + h) return moduleButton.mouseClicked((int) mouseY - currentY, button);
+            int h = moduleButton.fullHeight(configManager) + 1;
+            if (mouseY >= currentY && mouseY <= currentY + h) return moduleButton.mouseClicked((int) mouseY - currentY, button, configManager);
             currentY += h;
         }
         return false;
     }
 
     public void mouseReleased() { dragging = false; }
-    public boolean mouseScrolled(double mouseX, double mouseY, double amount) {
-        if (mouseX < x || mouseX > x + WIDTH || mouseY < y || !expanded) return false;
-        scroll = Math.min(0, scroll + (int) (amount * 12));
+
+    public boolean mouseScrolled(double mouseX, double mouseY, double amount, ConfigManager configManager) {
+        if (mouseX < x || mouseX > x + width(configManager) || mouseY < y || !expanded) return false;
+        scroll = Math.min(0, scroll + (int) (amount * 10));
         return true;
+    }
+
+    private int width(ConfigManager configManager) {
+        return Math.max(112, (int) Math.round(configManager.panelWidth() * configManager.guiScale()));
+    }
+
+    private int headerHeight(ConfigManager configManager) {
+        return Math.max(12, (int) Math.round(BASE_HEADER_HEIGHT * configManager.guiScale()));
+    }
+
+    private static void drawBorder(DrawContext context, int x, int y, int width, int height, int color) {
+        context.fill(x, y, x + width, y + 1, color);
+        context.fill(x, y, x + 1, y + height, color);
+        context.fill(x, y + height - 1, x + width, y + height, color);
+        context.fill(x + width - 1, y, x + width, y + height, color);
     }
 
     private static boolean matches(ModuleButton button, String search) {

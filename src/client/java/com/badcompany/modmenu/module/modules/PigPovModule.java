@@ -2,6 +2,7 @@ package com.badcompany.modmenu.module.modules;
 
 import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.Module;
+import com.badcompany.modmenu.module.ModuleStatus;
 import com.badcompany.modmenu.settings.BooleanSetting;
 import net.minecraft.client.option.Perspective;
 import net.minecraft.entity.passive.PigEntity;
@@ -23,7 +24,7 @@ public final class PigPovModule extends Module {
     private boolean activeOnPig;
 
     public PigPovModule() {
-        super("Pig POV", "Modern pig-riding camera helper that preserves vanilla entity dimensions and rendering.", Category.RENDER);
+        super("Pig POV", "Modern pig-riding camera helper that preserves vanilla entity dimensions and rendering.", Category.RENDER, ModuleStatus.WORKING);
     }
 
     @Override
