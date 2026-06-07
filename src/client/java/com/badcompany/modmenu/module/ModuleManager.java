@@ -1,6 +1,7 @@
 package com.badcompany.modmenu.module;
 
 import com.badcompany.modmenu.config.ConfigManager;
+import com.badcompany.modmenu.module.modules.AdvancedSearchModule;
 import com.badcompany.modmenu.module.modules.PlaceholderModule;
 import com.badcompany.modmenu.module.modules.TrueDurabilityModule;
 import net.minecraft.client.util.InputUtil;
@@ -25,7 +26,7 @@ public final class ModuleManager {
 
     public void registerDefaults() {
         register(new TrueDurabilityModule());
-        register(new PlaceholderModule("Advanced Search", "Highlights configured blocks and entities.", Category.RENDER, "Rendering hooks are staged for Fabric WorldRenderEvents."));
+        register(new AdvancedSearchModule());
         register(new PlaceholderModule("Book Formatting", "Modern book text formatting helpers.", Category.PLAYER, "Book edit screen integration is staged for a focused mixin."));
         register(new PlaceholderModule("Silent Close", "Closes selected screens without sending legacy close packets.", Category.EXPLOIT, "Packet behavior changed in 1.21; implementation is intentionally safe."));
         register(new PlaceholderModule("Packet Canceler", "Selective client packet cancellation.", Category.EXPLOIT, "Requires packet-specific Fabric mixins before enabling live cancellation."));

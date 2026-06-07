@@ -22,4 +22,33 @@ The default GUI keybind is backslash (`\\`) and can be changed from Minecraft's 
 
 ## Current Migration Status
 
-The first Fabric milestone focuses on a stable boot path, a configurable keybind, a modern ClickGUI shell, JSON configuration, chat command dispatch, and safe module registration. Legacy features that require deeper 1.21 packet/rendering hooks are represented as placeholders so the project remains compilable while preserving the feature map for future work.
+The Fabric 1.21.x migration is stable: the project has a working Java 21 Gradle/Fabric Loom build path, GitHub Actions build coverage, a runClient smoke workflow, a module framework, JSON config, ClickGUI, and the True Durability port. Advanced Search now has a safe client-side block/state search cache; its settings are persisted in JSON, while deeper box/tracer render pipeline polish remains a follow-up. Legacy features that still require deeper 1.21 packet/rendering hooks remain placeholders until each module is safely ported in its own PR.
+
+## Migration Checklist
+
+### Core Framework
+
+- [x] Fabric 1.21.x conversion
+- [x] Java 21
+- [x] Gradle/Fabric Loom build
+- [x] GitHub Actions build workflow
+- [x] runClient smoke workflow
+- [x] Module system
+- [x] Config system
+- [x] ClickGUI
+- [x] True Durability
+
+### Legacy Modules
+
+- [x] True Durability
+- [x] Advanced Search
+- [ ] Book Formatting
+- [ ] Silent Close
+- [ ] Packet Canceler
+- [ ] Portal Invulnerability
+- [ ] Pig POV
+- [ ] Entity Trace
+- [ ] Stalker
+- [ ] Undead
+- [ ] Bowbomb
+- [ ] PumpkinAura
