@@ -219,7 +219,8 @@ public final class AdvancedSearchModule extends Module {
         }
         Identifier id = Identifier.of(idText);
         Optional<Block> block = Registries.BLOCK.getOptionalValue(id);
-        return block.map(value -> new BlockFilter(value, stateFilters));
+        final Map<String, String> finalStateFilters = stateFilters;
+        return block.map(value -> new BlockFilter(value, finalStateFilters));
     }
 
     private static Map<String, String> parseStateFilters(String text) {
