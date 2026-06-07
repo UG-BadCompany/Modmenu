@@ -104,6 +104,17 @@ public final class ConfigManager {
         return config.accentColor;
     }
 
+    public int rowHeight() { config = sanitize(config); return config.gui.rowHeight; }
+    public double fontScale() { config = sanitize(config); return config.gui.fontScale; }
+    public int backgroundOpacity() { config = sanitize(config); return config.gui.backgroundOpacity; }
+    public int borderColor() { config = sanitize(config); return config.gui.borderColor; }
+    public int categoryHeaderColor(String category) {
+        config = sanitize(config);
+        return config.gui.categoryColors.getOrDefault(category, config.gui.categoryHeaderColor);
+    }
+    public int enabledModuleColor() { config = sanitize(config); return config.gui.enabledModuleColor; }
+    public int disabledModuleColor() { config = sanitize(config); return config.gui.disabledModuleColor; }
+
     public void cycleGuiScale() {
         config = sanitize(config);
         double current = config.gui.uiScale;
@@ -131,6 +142,21 @@ public final class ConfigManager {
     public void toggleCompactMode() {
         config = sanitize(config);
         config.gui.compactMode = !config.gui.compactMode;
+        config.gui.rowHeight = config.gui.compactMode ? 11 : 14;
+    }
+
+    public void cycleRowHeight() { config = sanitize(config); config.gui.rowHeight = config.gui.rowHeight < 12 ? 14 : config.gui.rowHeight < 14 ? 16 : 11; }
+    public void cycleFontScale() { config = sanitize(config); config.gui.fontScale = config.gui.fontScale < 0.9D ? 1.0D : config.gui.fontScale < 1.1D ? 1.2D : 0.8D; }
+    public void cycleBackgroundOpacity() { config = sanitize(config); config.gui.backgroundOpacity = config.gui.backgroundOpacity < 120 ? 170 : config.gui.backgroundOpacity < 210 ? 230 : 90; }
+    public void cycleBorderColor() { config = sanitize(config); config.gui.borderColor = nextColor(config.gui.borderColor); }
+    public void cycleHeaderColor() { config = sanitize(config); config.gui.categoryHeaderColor = nextColor(config.gui.categoryHeaderColor); }
+    public void cycleEnabledColor() { config = sanitize(config); config.gui.enabledModuleColor = nextColor(config.gui.enabledModuleColor); }
+    public void cycleDisabledColor() { config = sanitize(config); config.gui.disabledModuleColor = nextColor(config.gui.disabledModuleColor); }
+
+    private static int nextColor(int current) {
+        int[] colors = { 0xFFBBBBBB, 0xFF7C4DFF, 0xFF55FFFF, 0xFFFF66AA, 0xFFFFCC4D, 0xFF4CD964, 0xFFFF453A };
+        for (int i = 0; i < colors.length; i++) if (colors[i] == current) return colors[(i + 1) % colors.length];
+        return colors[0];
     }
 
     public void resetGuiLayout() {
@@ -148,8 +174,17 @@ public final class ConfigManager {
         if (safe.gui == null) safe.gui = new GuiConfig();
         if (safe.gui.panels == null) safe.gui.panels = new HashMap<>();
         safe.gui.background = GuiBackground.from(safe.gui.background).id();
-        safe.gui.uiScale = clamp(safe.gui.uiScale, 0.75D, 1.25D);
-        safe.gui.panelWidth = (int) clamp(safe.gui.panelWidth, 120, 180);
+        safe.gui.uiScale = clamp(safe.gui.uiScale, 0.65D, 1.25D);
+        safe.gui.fontScale = clamp(safe.gui.fontScale, 0.75D, 1.25D);
+        safe.gui.panelWidth = (int) clamp(safe.gui.panelWidth, 104, 180);
+        safe.gui.rowHeight = (int) clamp(safe.gui.rowHeight, 10, 18);
+        safe.gui.backgroundOpacity = (int) clamp(safe.gui.backgroundOpacity, 0, 255);
+        if (safe.gui.categoryColors == null) safe.gui.categoryColors = new HashMap<>();
+        if (safe.gui.colorPresets == null) safe.gui.colorPresets = new HashMap<>();
+        if (safe.profiles == null) safe.profiles = new HashMap<>();
+        if (safe.friends == null) safe.friends = new HashMap<>();
+        if (safe.waypoints == null) safe.waypoints = new HashMap<>();
+        if (safe.searchPresets == null) safe.searchPresets = new HashMap<>();
         if (safe.modules == null) safe.modules = new HashMap<>();
         return safe;
     }
@@ -238,14 +273,27 @@ public final class ConfigManager {
         public String openGuiKey = "key.keyboard.backslash";
         public GuiConfig gui = new GuiConfig();
         public Map<String, ModuleConfig> modules = new HashMap<>();
+        public Map<String, String> profiles = new HashMap<>();
+        public Map<String, String> friends = new HashMap<>();
+        public Map<String, String> waypoints = new HashMap<>();
+        public Map<String, String> searchPresets = new HashMap<>();
         public int accentColor = 0xFF7C4DFF;
     }
 
     public static final class GuiConfig {
         public String background = GuiBackground.LIGHT_DIM.id();
         public Map<String, PanelConfig> panels = new HashMap<>();
-        public double uiScale = 1.0D;
-        public int panelWidth = 150;
+        public double uiScale = 0.85D;
+        public double fontScale = 0.9D;
+        public int panelWidth = 126;
+        public int rowHeight = 11;
+        public int backgroundOpacity = 170;
+        public int borderColor = 0xFFBBBBBB;
+        public int categoryHeaderColor = 0x557C4DFF;
+        public int enabledModuleColor = 0xFF7C4DFF;
+        public int disabledModuleColor = 0xFFBBBBBB;
+        public Map<String, Integer> categoryColors = new HashMap<>();
+        public Map<String, Integer> colorPresets = new HashMap<>();
         public boolean compactMode = true;
     }
 

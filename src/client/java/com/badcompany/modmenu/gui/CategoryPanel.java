@@ -11,9 +11,7 @@ import java.util.List;
 import java.util.Locale;
 
 public final class CategoryPanel {
-    private static final int BASE_HEADER_HEIGHT = 16;
-    private static final int LEGACY_BACKGROUND = 0xD8000000;
-    private static final int LEGACY_BORDER = 0xFFBBBBBB;
+    private static final int BASE_HEADER_HEIGHT = 13;
     private final Category category;
     private final List<ModuleButton> buttons = new ArrayList<>();
     private int x;
@@ -58,11 +56,11 @@ public final class CategoryPanel {
         y = Math.max(4, Math.min(y, Math.max(4, screenHeight - headerHeight - 4)));
 
         int visibleHeight = expanded ? Math.min(panelContentHeight(configManager), Math.max(headerHeight, screenHeight - y - 6)) : headerHeight;
-        context.fill(x, y, x + width, y + visibleHeight, LEGACY_BACKGROUND);
-        drawBorder(context, x, y, width, visibleHeight, LEGACY_BORDER);
-        context.fill(x + 2, y + 2, x + width - 2, y + headerHeight, 0x55000000 | (accent & 0x00FFFFFF));
-        context.drawText(client.textRenderer, category.displayName(), x + 5, y + 4, 0xFFEEEEEE, false);
-        context.drawText(client.textRenderer, expanded ? "-" : "+", x + width - 10, y + 4, 0xFFEEEEEE, false);
+        context.fill(x, y, x + width, y + visibleHeight, (configManager.backgroundOpacity() << 24));
+        drawBorder(context, x, y, width, visibleHeight, configManager.borderColor());
+        context.fill(x + 1, y + 1, x + width - 1, y + headerHeight, configManager.categoryHeaderColor(category.name()));
+        context.drawText(client.textRenderer, category.displayName(), x + 4, y + 3, 0xFFEEEEEE, false);
+        context.drawText(client.textRenderer, expanded ? "-" : "+", x + width - 9, y + 3, 0xFFEEEEEE, false);
         if (!expanded) return;
 
         int contentY = y + headerHeight + scroll;
@@ -109,11 +107,11 @@ public final class CategoryPanel {
     }
 
     private int width(ConfigManager configManager) {
-        return Math.max(120, (int) Math.round(configManager.panelWidth() * configManager.guiScale()));
+        return Math.max(104, (int) Math.round(configManager.panelWidth() * configManager.guiScale()));
     }
 
     private int headerHeight(ConfigManager configManager) {
-        return Math.max(12, (int) Math.round(BASE_HEADER_HEIGHT * configManager.guiScale()));
+        return Math.max(11, (int) Math.round(BASE_HEADER_HEIGHT * configManager.guiScale()));
     }
 
     private int panelContentHeight(ConfigManager configManager) {

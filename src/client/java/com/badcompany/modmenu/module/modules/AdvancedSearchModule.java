@@ -60,6 +60,30 @@ public final class AdvancedSearchModule extends Module {
             4.0D,
             MAX_RANGE
     ));
+    private final NumberSetting scanDelay = addSetting(new NumberSetting(
+            "Scan delay",
+            "Ticks to wait between budgeted scan slices.",
+            2.0D,
+            0.0D,
+            40.0D
+    ));
+    private final NumberSetting maxBlocksPerScan = addSetting(new NumberSetting(
+            "Max blocks per scan",
+            "Maximum block positions checked per tick slice.",
+            DEFAULT_SCAN_BUDGET,
+            256.0D,
+            16384.0D
+    ));
+    private final StringSetting perBlockColors = addSetting(new StringSetting(
+            "Per-block colors",
+            "Comma separated block=color entries, e.g. minecraft:diamond_ore=#FF55FFFF.",
+            ""
+    ));
+    private final StringSetting presetName = addSetting(new StringSetting(
+            "Preset",
+            "Name used by config/search preset commands when saving custom block lists.",
+            "ores"
+    ));
 
     private final List<CachedTarget> cachedTargets = new ArrayList<>();
     private final List<BlockPos> scanPositions = new ArrayList<>();
@@ -183,7 +207,8 @@ public final class AdvancedSearchModule extends Module {
 
         BlockPos.Mutable mutable = new BlockPos.Mutable();
         int scanned = 0;
-        while (scanned < DEFAULT_SCAN_BUDGET && cursor < scanPositions.size()) {
+        int budget = (int) Math.round(maxBlocksPerScan.get());
+        while (scanned < budget && cursor < scanPositions.size()) {
             BlockPos offset = scanPositions.get(cursor++);
             mutable.set(origin.getX() + offset.getX(), origin.getY() + offset.getY(), origin.getZ() + offset.getZ());
             BlockState state = world.getBlockState(mutable);
@@ -196,7 +221,7 @@ public final class AdvancedSearchModule extends Module {
 
         if (cursor >= scanPositions.size() || cachedTargets.size() >= MAX_CACHED_TARGETS) {
             cursor = 0;
-            rescanCooldownTicks = 10;
+            rescanCooldownTicks = (int) Math.round(scanDelay.get());
         }
     }
 
