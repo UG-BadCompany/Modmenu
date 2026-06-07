@@ -55,7 +55,7 @@ public final class CategoryPanel {
         context.fill(x - 1, y - 1, x + WIDTH + 1, y + HEADER_HEIGHT + 1, 0xFF050507);
         context.fill(x, y, x + WIDTH, y + HEADER_HEIGHT, 0xF21A1A22);
         context.fill(x, y + HEADER_HEIGHT - 2, x + WIDTH, y + HEADER_HEIGHT, 0xFF7C4DFF);
-        context.drawTextWithShadow(client.textRenderer, category.name(), x + 7, y + 7, 0xFFFFFFFF);
+        context.drawTextWithShadow(client.textRenderer, category.displayName(), x + 7, y + 7, 0xFFFFFFFF);
         context.drawTextWithShadow(client.textRenderer, expanded ? "▾" : "▸", x + WIDTH - 14, y + 7, 0xFFFFFFFF);
         if (!expanded) return;
         int contentY = y + HEADER_HEIGHT + scroll;

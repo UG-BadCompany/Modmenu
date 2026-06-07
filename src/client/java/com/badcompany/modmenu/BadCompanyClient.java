@@ -3,6 +3,7 @@ package com.badcompany.modmenu;
 import com.badcompany.modmenu.commands.CommandManager;
 import com.badcompany.modmenu.config.ConfigManager;
 import com.badcompany.modmenu.gui.ClickGuiScreen;
+import com.badcompany.modmenu.hunting.HuntDatabase;
 import com.badcompany.modmenu.module.Module;
 import com.badcompany.modmenu.module.ModuleManager;
 import net.fabricmc.api.ClientModInitializer;
@@ -52,7 +53,7 @@ public final class BadCompanyClient implements ClientModInitializer {
         commandManager = new CommandManager(MODULES);
 
         ClientTickEvents.END_CLIENT_TICK.register(this::onClientTick);
-        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> configManager.saveSafely());
+        ClientLifecycleEvents.CLIENT_STOPPING.register(client -> { configManager.saveSafely(); HuntDatabase.get().saveSafely(); });
         ClientSendMessageEvents.ALLOW_CHAT.register(commandManager::handleChat);
         LOGGER.info("BadCompany initialized with {} modules", MODULES.modules().size());
     }
