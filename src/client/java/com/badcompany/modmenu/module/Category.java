@@ -6,7 +6,7 @@ public enum Category {
     MOVEMENT("Movement"),
     PLAYER("Player"),
     WORLD("World"),
-    HUNTING("Hunting"),
+    HUNTING("Hunting/Base Hunting"),
     MISC("Misc"),
     EXPLOIT("Exploit");
 

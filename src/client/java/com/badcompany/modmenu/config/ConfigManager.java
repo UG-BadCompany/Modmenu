@@ -72,11 +72,27 @@ public final class ConfigManager {
         panelConfig.x = panel.x();
         panelConfig.y = panel.y();
         panelConfig.expanded = panel.expanded();
+        panelConfig.userPlaced = true;
     }
 
     public void cycleGuiBackground() {
         config = sanitize(config);
         config.gui.background = GuiBackground.next(config.gui.background).id();
+    }
+
+    public void cycleTheme() {
+        config = sanitize(config);
+        applyTheme(GuiTheme.next(config.gui.theme));
+    }
+
+    public void cycleProfile() {
+        config = sanitize(config);
+        config.gui.activeProfile = switch (config.gui.activeProfile) {
+            case "main" -> "pvp";
+            case "pvp" -> "hunting";
+            case "hunting" -> "testing";
+            default -> "main";
+        };
     }
 
     public GuiBackground guiBackground() {
@@ -114,6 +130,13 @@ public final class ConfigManager {
     }
     public int enabledModuleColor() { config = sanitize(config); return config.gui.enabledModuleColor; }
     public int disabledModuleColor() { config = sanitize(config); return config.gui.disabledModuleColor; }
+    public int backgroundColor() { config = sanitize(config); return config.gui.backgroundColor; }
+    public int textColor() { config = sanitize(config); return config.gui.textColor; }
+    public int warningColor() { config = sanitize(config); return config.gui.warningColor; }
+    public GuiTheme theme() { config = sanitize(config); return GuiTheme.from(config.gui.theme); }
+    public String activeProfile() { config = sanitize(config); return config.gui.activeProfile; }
+    public int rowHeightScaled() { return Math.max(10, (int) Math.round(rowHeight() * guiScale())); }
+    public int scrollStep() { return Math.max(8, rowHeightScaled() * 3); }
 
     public void cycleGuiScale() {
         config = sanitize(config);
@@ -153,6 +176,22 @@ public final class ConfigManager {
     public void cycleEnabledColor() { config = sanitize(config); config.gui.enabledModuleColor = nextColor(config.gui.enabledModuleColor); }
     public void cycleDisabledColor() { config = sanitize(config); config.gui.disabledModuleColor = nextColor(config.gui.disabledModuleColor); }
 
+    private void applyTheme(GuiTheme theme) {
+        config.gui.theme = theme.id();
+        config.gui.compactMode = theme.compact;
+        config.gui.panelWidth = theme.panelWidth;
+        config.gui.rowHeight = theme.rowHeight;
+        config.gui.backgroundOpacity = theme.backgroundOpacity;
+        config.accentColor = theme.accentColor;
+        config.gui.categoryHeaderColor = theme.headerColor;
+        config.gui.backgroundColor = theme.backgroundColor;
+        config.gui.borderColor = theme.borderColor;
+        config.gui.textColor = theme.textColor;
+        config.gui.enabledModuleColor = theme.enabledColor;
+        config.gui.disabledModuleColor = theme.disabledColor;
+        config.gui.warningColor = theme.warningColor;
+    }
+
     private static int nextColor(int current) {
         int[] colors = { 0xFFBBBBBB, 0xFF7C4DFF, 0xFF55FFFF, 0xFFFF66AA, 0xFFFFCC4D, 0xFF4CD964, 0xFFFF453A };
         for (int i = 0; i < colors.length; i++) if (colors[i] == current) return colors[(i + 1) % colors.length];
@@ -174,13 +213,22 @@ public final class ConfigManager {
         if (safe.gui == null) safe.gui = new GuiConfig();
         if (safe.gui.panels == null) safe.gui.panels = new HashMap<>();
         safe.gui.background = GuiBackground.from(safe.gui.background).id();
+        safe.gui.theme = GuiTheme.from(safe.gui.theme).id();
         safe.gui.uiScale = clamp(safe.gui.uiScale, 0.65D, 1.25D);
         safe.gui.fontScale = clamp(safe.gui.fontScale, 0.75D, 1.25D);
         safe.gui.panelWidth = (int) clamp(safe.gui.panelWidth, 104, 180);
         safe.gui.rowHeight = (int) clamp(safe.gui.rowHeight, 10, 18);
         safe.gui.backgroundOpacity = (int) clamp(safe.gui.backgroundOpacity, 0, 255);
+        safe.gui.backgroundColor |= 0xFF000000;
+        safe.gui.borderColor |= 0xFF000000;
+        safe.gui.textColor |= 0xFF000000;
+        safe.gui.enabledModuleColor |= 0xFF000000;
+        safe.gui.disabledModuleColor |= 0xFF000000;
+        safe.gui.warningColor |= 0xFF000000;
+        if (safe.gui.activeProfile == null || safe.gui.activeProfile.isBlank()) safe.gui.activeProfile = "main";
         if (safe.gui.categoryColors == null) safe.gui.categoryColors = new HashMap<>();
         if (safe.gui.colorPresets == null) safe.gui.colorPresets = new HashMap<>();
+        if (safe.gui.hudElements == null) safe.gui.hudElements = new HashMap<>();
         if (safe.profiles == null) safe.profiles = new HashMap<>();
         if (safe.friends == null) safe.friends = new HashMap<>();
         if (safe.waypoints == null) safe.waypoints = new HashMap<>();
@@ -292,9 +340,69 @@ public final class ConfigManager {
         public int categoryHeaderColor = 0x557C4DFF;
         public int enabledModuleColor = 0xFF7C4DFF;
         public int disabledModuleColor = 0xFFBBBBBB;
+        public int backgroundColor = 0xFF080A0F;
+        public int textColor = 0xFFECEFF4;
+        public int warningColor = 0xFFFF453A;
+        public String theme = GuiTheme.CLEAN_MODERN.id();
+        public String activeProfile = "main";
         public Map<String, Integer> categoryColors = new HashMap<>();
         public Map<String, Integer> colorPresets = new HashMap<>();
+        public Map<String, HudElementConfig> hudElements = new HashMap<>();
         public boolean compactMode = true;
+    }
+
+    public enum GuiTheme {
+        LEGACY_112("legacy_112", "Legacy", 0xFFBEBEBE, 0x55303030, 0xFF050505, 0xFF9A9A9A, 0xFFE8E8E8, 0xFFBEBEBE, 0xFF8F8F8F, 0xFFFF453A, 150, 126, 11, true),
+        FUTURE_DARK("future_dark", "Future", 0xFF9B6DFF, 0x7728193D, 0xFF07080D, 0xFF7E67D8, 0xFFECEBFF, 0xFF9B6DFF, 0xFFA7A1B8, 0xFFFF4D6D, 185, 132, 11, true),
+        RUSHER_COMPACT("rusher_compact", "Rusher", 0xFF55D6FF, 0x66214A5A, 0xFF05080A, 0xFF3E6D80, 0xFFEAF8FF, 0xFF55D6FF, 0xFF9EB7C1, 0xFFFFB84D, 175, 120, 10, true),
+        CLEAN_MODERN("clean_modern", "Clean", 0xFF4CD964, 0x55305A3A, 0xFF0B0F14, 0xFF304050, 0xFFF2F5F8, 0xFF4CD964, 0xFFAEB7C2, 0xFFFF453A, 180, 136, 12, true),
+        HIGH_CONTRAST("high_contrast", "Contrast", 0xFFFFFF00, 0xAA000000, 0xFF000000, 0xFFFFFFFF, 0xFFFFFFFF, 0xFF00FF66, 0xFFFFFFFF, 0xFFFF3030, 230, 150, 14, false);
+
+        private final String id;
+        private final String label;
+        private final int accentColor;
+        private final int headerColor;
+        private final int backgroundColor;
+        private final int borderColor;
+        private final int textColor;
+        private final int enabledColor;
+        private final int disabledColor;
+        private final int warningColor;
+        private final int backgroundOpacity;
+        private final int panelWidth;
+        private final int rowHeight;
+        private final boolean compact;
+
+        GuiTheme(String id, String label, int accentColor, int headerColor, int backgroundColor, int borderColor, int textColor, int enabledColor, int disabledColor, int warningColor, int backgroundOpacity, int panelWidth, int rowHeight, boolean compact) {
+            this.id = id;
+            this.label = label;
+            this.accentColor = accentColor;
+            this.headerColor = headerColor;
+            this.backgroundColor = backgroundColor;
+            this.borderColor = borderColor;
+            this.textColor = textColor;
+            this.enabledColor = enabledColor;
+            this.disabledColor = disabledColor;
+            this.warningColor = warningColor;
+            this.backgroundOpacity = backgroundOpacity;
+            this.panelWidth = panelWidth;
+            this.rowHeight = rowHeight;
+            this.compact = compact;
+        }
+
+        public String id() { return id; }
+        public String label() { return label; }
+
+        public static GuiTheme from(String id) {
+            for (GuiTheme theme : values()) if (theme.id.equalsIgnoreCase(String.valueOf(id))) return theme;
+            return CLEAN_MODERN;
+        }
+
+        public static GuiTheme next(String id) {
+            GuiTheme current = from(id);
+            GuiTheme[] values = values();
+            return values[(current.ordinal() + 1) % values.length];
+        }
     }
 
     public enum GuiBackground {
@@ -332,6 +440,15 @@ public final class ConfigManager {
         public int x;
         public int y;
         public boolean expanded = true;
+        public boolean userPlaced;
+    }
+
+    public static final class HudElementConfig {
+        public int x;
+        public int y;
+        public boolean enabled = true;
+        public double scale = 1.0D;
+        public int color = 0xFF4CD964;
     }
 
     public static final class ModuleConfig {
