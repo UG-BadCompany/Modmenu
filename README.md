@@ -49,7 +49,7 @@ Status labels are intentionally conservative: modules are not marked working unl
 
 | Module | Category | Status | Notes |
 | --- | --- | --- | --- |
-| Advanced Search | Render | Working | Incrementally scans nearby loaded blocks for configured ids/state filters and exposes cached matches for highlights/render integrations. |
+| Advanced Search | Render | Partial | Incrementally scans nearby loaded blocks for configured ids/state filters and emits client-side highlight particles; full boxed/tracer world rendering is still incomplete. |
 | Book Formatting | Player | Partial | Detects modern book editing screens and shows formatting-code help; direct legacy text injection is not restored yet. |
 | Bowbomb | Exploit | Unsafe/Disabled | The legacy packet-burst behavior is deliberately disabled on modern Minecraft; the GUI prevents enabling it. |
 | Entity Trace | Render | Partial | Tracks loaded entities and reports large position jumps; full legacy tracer rendering still needs a dedicated world-render hook. |
@@ -57,7 +57,7 @@ Status labels are intentionally conservative: modules are not marked working unl
 | Ignore Players | Misc | Working | Hides chat from configured player names with an optional game-message filter. |
 | Packet Canceler | Exploit | Partial | Exposes safe clientbound/serverbound filter lists and audit notices; it does not silently drop modern protocol traffic. |
 | Pig POV | Render | Working | Switches to first person while riding pigs and restores the previous perspective afterward. |
-| Portal Invulnerability | Exploit | Partial | Detects portal contact and dimension changes while preserving vanilla teleport handling. |
+| Portal Invulnerability | Exploit | Unsafe / Not portable | Detects portal contact for local notices only; legacy teleport-confirm suppression is not safe or portable on modern servers. |
 | PumpkinAura | World | Partial | Uses normal vanilla interaction to place held pumpkins on legal supports with safety gates; exploit-style automation is not claimed. |
 | Silent Close | Exploit | Partial | Records handled-screen close transitions and last container details; close-packet suppression is not claimed in the port. |
 | Stalker | Player | Working | Watches tab-list joins, leaves, names, and game-mode changes using modern client state. |
@@ -102,7 +102,7 @@ Status labels are intentionally conservative: modules are not marked working unl
 
 ## ClickGUI
 
-The ClickGUI opens with the backslash (`\`) keybind by default and now follows the compact legacy `1.12.2` Family Fun Pack layout: black translucent panels, one-pixel accent borders, small category headers, compact module rows, and non-stretched text. The top controls expose the new GUI settings: UI scale, accent color, panel width, compact/roomy mode, layout reset, background mode, and the intelligence dashboard. Module rows include a visible status badge (`Working`, `Partial`, `Place`, or `Unsafe`) so placeholder or unsafe modules are not presented as complete ports.
+The ClickGUI opens with the backslash (`\`) keybind by default and now follows the compact legacy `1.12.2` Family Fun Pack layout: black translucent panels, one-pixel accent borders, small category headers, compact module rows, and non-stretched text. The top controls expose the new GUI settings: UI scale, accent color, panel width, compact/roomy mode, layout reset, background mode, and the intelligence dashboard. Module rows use compact legacy labels plus small on/off switches; unsafe modules render with warning coloring and refuse to enable, so placeholder or unsafe modules are not presented as complete ports.
 
 ## GitHub Actions
 
@@ -114,6 +114,6 @@ The repository is expected to stay green on these workflows:
 
 ## Migration Status
 
-The Minecraft `1.21.11+` Fabric migration is complete. The production path now consists of a Java 21 Fabric Loom build, a Fabric client initializer, a module registry, ClickGUI, command manager, and JSON configuration persistence. Exploit-heavy packet behavior from the historical client has been replaced with safe client-side monitoring or configuration-only modules where direct behavior would be unsafe or inappropriate on modern servers.
+The Minecraft `1.21.11+` Fabric migration is not considered complete until every listed module is either verified working in-game or documented as partial/unsafe with a concrete technical blocker. The production path now consists of a Java 21 Fabric Loom build, a Fabric client initializer, a module registry, ClickGUI, command manager, and JSON configuration persistence. Exploit-heavy packet behavior from the historical client has been replaced with safe client-side monitoring or configuration-only modules where direct behavior would be unsafe or inappropriate on modern servers.
 
 See [`MIGRATION_SUMMARY.md`](MIGRATION_SUMMARY.md) for the final migration summary, architecture notes, module status table, and known modern-Fabric limitations.

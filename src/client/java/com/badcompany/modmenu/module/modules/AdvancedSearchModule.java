@@ -11,6 +11,7 @@ import com.badcompany.modmenu.settings.StringSetting;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.particle.ParticleTypes;
 import net.minecraft.registry.Registries;
 import net.minecraft.state.property.Property;
 import net.minecraft.util.Identifier;
@@ -67,9 +68,10 @@ public final class AdvancedSearchModule extends Module {
     private int lastRange = -1;
     private int cursor;
     private int rescanCooldownTicks;
+    private int particlePulseTicks;
 
     public AdvancedSearchModule() {
-        super("Advanced Search", "Safely searches nearby loaded blocks using configurable block and state filters.", Category.RENDER, ModuleStatus.WORKING);
+        super("Advanced Search", "Safely searches nearby loaded blocks using configurable block and state filters.", Category.RENDER, ModuleStatus.PARTIAL);
     }
 
     @Override
@@ -112,6 +114,7 @@ public final class AdvancedSearchModule extends Module {
         }
 
         scanBudgeted(client.world, client.player.getBlockPos());
+        pulseHighlightParticles();
     }
 
     public List<CachedTarget> cachedTargets() {
@@ -128,6 +131,17 @@ public final class AdvancedSearchModule extends Module {
 
     public boolean showBoxes() {
         return showBoxes.get();
+    }
+
+    private void pulseHighlightParticles() {
+        if (!showBoxes.get() || cachedTargets.isEmpty() || client.world == null || client.player == null) return;
+        if (particlePulseTicks++ % 10 != 0) return;
+        int emitted = 0;
+        for (CachedTarget target : cachedTargets) {
+            if (emitted++ >= 64) break;
+            BlockPos pos = target.pos();
+            client.world.addParticleClient(ParticleTypes.END_ROD, pos.getX() + 0.5D, pos.getY() + 1.03D, pos.getZ() + 0.5D, 0.0D, 0.015D, 0.0D);
+        }
     }
 
     private boolean rebuildFiltersIfNeeded(boolean force) {
