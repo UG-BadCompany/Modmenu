@@ -38,8 +38,8 @@ public class StalkModule extends AbstractPlayersRegister implements PacketListen
     if(handler != null) {
       for(NetworkPlayerInfo info : handler.getPlayerInfoMap()) {
         this.uuids_lock.readLock().lock();
-        if(this.uuids.contains(info.getGameProfile().getId())) {
-          FamilyFunPack.printMessage(StalkModule.ANNOUNCE_COLOR + "Player " + info.getGameProfile().getName() + " is connected [" + info.getGameType().getName() + "]");
+        if(this.uuids.contains(info.getGameProfile().id())) {
+          FamilyFunPack.printMessage(StalkModule.ANNOUNCE_COLOR + "Player " + info.getGameProfile().name() + " is connected [" + info.getGameType().getName() + "]");
         }
         this.uuids_lock.readLock().unlock();
       }
@@ -61,12 +61,12 @@ public class StalkModule extends AbstractPlayersRegister implements PacketListen
 
       for(SPacketPlayerListItem.AddPlayerData entry : list.getEntries()) {
 
-        UUID uuid = entry.getProfile().getId();
-        String name = entry.getProfile().getName();
+        UUID uuid = entry.getProfile().id();
+        String name = entry.getProfile().name();
         if(name == null) {
-          NetworkPlayerInfo info = handler.getPlayerInfo(entry.getProfile().getId());
+          NetworkPlayerInfo info = handler.getPlayerInfo(entry.getProfile().id());
           if(info == null) continue;
-          name = info.getGameProfile().getName();
+          name = info.getGameProfile().name();
         }
 
         this.uuids_lock.readLock().lock();
@@ -108,11 +108,11 @@ public class StalkModule extends AbstractPlayersRegister implements PacketListen
       GameProfile sender = AbstractPlayersRegister.getSender(chat.getChatComponent());
       if(sender != null) {
         this.uuids_lock.readLock().lock();
-        boolean flag = this.uuids.contains(sender.getId());
+        boolean flag = this.uuids.contains(sender.id());
         this.uuids_lock.readLock().unlock();
 
         if(flag) {
-          TextComponentString nmsg = new TextComponentString(chat.getChatComponent().getFormattedText().replace(String.format("<%s>", sender.getName()), String.format("%s<%s>%s", StalkModule.ANNOUNCE_COLOR, sender.getName(), TextFormatting.RESET)));
+          TextComponentString nmsg = new TextComponentString(chat.getChatComponent().getFormattedText().replace(String.format("<%s>", sender.name()), String.format("%s<%s>%s", StalkModule.ANNOUNCE_COLOR, sender.name(), TextFormatting.RESET)));
           packet = new SPacketChat(nmsg, chat.getType());
         }
       }

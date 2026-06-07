@@ -51,7 +51,7 @@ public class IgnoreModule extends AbstractPlayersRegister implements PacketListe
     GameProfile sender = StalkModule.getSender(chat.getChatComponent());
     if(sender != null) {
       this.uuids_lock.readLock().lock();
-      boolean flag = this.uuids.contains(sender.getId());
+      boolean flag = this.uuids.contains(sender.id());
       this.uuids_lock.readLock().unlock();
 
       if(flag) return null;
