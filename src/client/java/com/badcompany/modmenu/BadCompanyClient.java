@@ -13,7 +13,6 @@ import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,7 @@ import java.util.Set;
 public final class BadCompanyClient implements ClientModInitializer {
     public static final String MOD_ID = "badcompany";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    private static final KeyBinding.Category KEY_CATEGORY = KeyBinding.Category.create(Identifier.of(MOD_ID, "keybindings"));
+    private static final String KEY_CATEGORY = "key.category.badcompany";
     public static KeyBinding OPEN_GUI_KEY;
 
     private static final ModuleManager MODULES = new ModuleManager();

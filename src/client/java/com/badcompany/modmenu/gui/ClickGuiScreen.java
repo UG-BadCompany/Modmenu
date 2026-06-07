@@ -4,12 +4,9 @@ import com.badcompany.modmenu.config.ConfigManager;
 import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.ModuleManager;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.input.CharInput;
-import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
@@ -63,18 +60,18 @@ public final class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean mouseClicked(Click click, boolean doubled) {
-        if (searchBox.mouseClicked(click, doubled)) return true;
-        for (CategoryPanel panel : panels) if (panel.mouseClicked(click.x(), click.y(), click.button())) return true;
-        return super.mouseClicked(click, doubled);
+    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (searchBox.mouseClicked(mouseX, mouseY, button)) return true;
+        for (CategoryPanel panel : panels) if (panel.mouseClicked(mouseX, mouseY, button)) return true;
+        return super.mouseClicked(mouseX, mouseY, button);
     }
 
     @Override
-    public boolean mouseReleased(Click click) {
+    public boolean mouseReleased(double mouseX, double mouseY, int button) {
         panels.forEach(CategoryPanel::mouseReleased);
         panels.forEach(configManager::rememberPanel);
         configManager.saveSafely();
-        return super.mouseReleased(click);
+        return super.mouseReleased(mouseX, mouseY, button);
     }
 
     @Override
@@ -84,14 +81,14 @@ public final class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean charTyped(CharInput input) {
-        return searchBox.charTyped(input) || super.charTyped(input);
+    public boolean charTyped(char chr, int modifiers) {
+        return searchBox.charTyped(chr, modifiers) || super.charTyped(chr, modifiers);
     }
 
     @Override
-    public boolean keyPressed(KeyInput input) {
-        if (searchBox.keyPressed(input)) return true;
-        return super.keyPressed(input);
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (searchBox.keyPressed(keyCode, scanCode, modifiers)) return true;
+        return super.keyPressed(keyCode, scanCode, modifiers);
     }
 
     @Override
