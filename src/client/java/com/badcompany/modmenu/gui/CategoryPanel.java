@@ -12,6 +12,8 @@ import java.util.Locale;
 
 public final class CategoryPanel {
     private static final int BASE_HEADER_HEIGHT = 16;
+    private static final int LEGACY_BACKGROUND = 0xD8000000;
+    private static final int LEGACY_BORDER = 0xFFBBBBBB;
     private final Category category;
     private final List<ModuleButton> buttons = new ArrayList<>();
     private int x;
@@ -55,15 +57,17 @@ public final class CategoryPanel {
         x = Math.max(4, Math.min(x, Math.max(4, client.getWindow().getScaledWidth() - width - 4)));
         y = Math.max(4, Math.min(y, Math.max(4, screenHeight - headerHeight - 4)));
 
-        context.fill(x, y, x + width, y + headerHeight, 0xD8000000);
-        drawBorder(context, x, y, width, headerHeight, accent);
+        int visibleHeight = expanded ? Math.min(panelContentHeight(configManager), Math.max(headerHeight, screenHeight - y - 6)) : headerHeight;
+        context.fill(x, y, x + width, y + visibleHeight, LEGACY_BACKGROUND);
+        drawBorder(context, x, y, width, visibleHeight, LEGACY_BORDER);
+        context.fill(x + 2, y + 2, x + width - 2, y + headerHeight, 0x55000000 | (accent & 0x00FFFFFF));
         context.drawText(client.textRenderer, category.displayName(), x + 5, y + 4, 0xFFEEEEEE, false);
         context.drawText(client.textRenderer, expanded ? "-" : "+", x + width - 10, y + 4, 0xFFEEEEEE, false);
         if (!expanded) return;
 
         int contentY = y + headerHeight + scroll;
-        int clipBottom = screenHeight - 6;
-        context.enableScissor(x, y + headerHeight, x + width, clipBottom);
+        int clipBottom = Math.min(screenHeight - 6, y + visibleHeight - 2);
+        context.enableScissor(x + 2, y + headerHeight, x + width - 2, clipBottom);
         for (ModuleButton button : buttons) {
             if (!matches(button, search)) continue;
             button.render(context, x, contentY, width, mouseX, mouseY, configManager);
@@ -105,11 +109,19 @@ public final class CategoryPanel {
     }
 
     private int width(ConfigManager configManager) {
-        return Math.max(112, (int) Math.round(configManager.panelWidth() * configManager.guiScale()));
+        return Math.max(120, (int) Math.round(configManager.panelWidth() * configManager.guiScale()));
     }
 
     private int headerHeight(ConfigManager configManager) {
         return Math.max(12, (int) Math.round(BASE_HEADER_HEIGHT * configManager.guiScale()));
+    }
+
+    private int panelContentHeight(ConfigManager configManager) {
+        int contentHeight = headerHeight(configManager) + 2;
+        for (ModuleButton button : buttons) {
+            if (matches(button, lastSearch)) contentHeight += button.fullHeight(configManager);
+        }
+        return Math.max(headerHeight(configManager), contentHeight + 2);
     }
 
     private static void drawBorder(DrawContext context, int x, int y, int width, int height, int color) {

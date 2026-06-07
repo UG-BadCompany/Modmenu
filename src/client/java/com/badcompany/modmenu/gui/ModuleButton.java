@@ -13,6 +13,8 @@ import net.minecraft.text.Text;
 
 public final class ModuleButton {
     private static final int BASE_HEIGHT = 13;
+    private static final int TOGGLE_WIDTH = 16;
+    private static final int TOGGLE_HEIGHT = 7;
     private final Module module;
     private boolean expanded;
 
@@ -27,30 +29,26 @@ public final class ModuleButton {
     public void render(DrawContext context, int x, int y, int width, int mouseX, int mouseY, ConfigManager configManager) {
         MinecraftClient client = MinecraftClient.getInstance();
         int height = height(configManager);
-        int accent = configManager.accentColor();
         boolean hovered = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height;
-        int background = module.enabled() ? withAlpha(accent, 0xCC) : hovered ? 0xCC222222 : 0x99000000;
-        if (module.status() == ModuleStatus.UNSAFE_DISABLED) background = hovered ? 0xCC331111 : 0x99180000;
+        int rowColor = hovered ? 0x33111111 : 0x00000000;
+        if (module.status() == ModuleStatus.UNSAFE_DISABLED) rowColor = hovered ? 0x44331111 : 0x22180000;
+        if (rowColor != 0) context.fill(x + 2, y, x + width - 2, y + height, rowColor);
 
-        context.fill(x, y, x + width, y + height, background);
-        drawBorder(context, x, y, width, height, module.enabled() ? accent : 0xFFBBBBBB);
         int labelColor = module.status() == ModuleStatus.UNSAFE_DISABLED ? 0xFFFFB0B0 : 0xFFEEEEEE;
-        context.drawText(client.textRenderer, module.name(), x + 4, y + 3, labelColor, false);
-
-        String status = compactStatus(module.status());
-        int statusWidth = client.textRenderer.getWidth(status);
-        int statusColor = module.status().color();
-        context.drawText(client.textRenderer, status, x + width - statusWidth - 14, y + 3, statusColor, false);
-        context.drawText(client.textRenderer, expanded ? "-" : "+", x + width - 9, y + 3, 0xFFEEEEEE, false);
+        context.drawText(client.textRenderer, module.name(), x + 6, y + 2, labelColor, false);
+        drawLegacyToggle(context, x + width - 22, y + 3, module.enabled(), module.status(), configManager.accentColor());
+        if (!module.settings().isEmpty()) {
+            context.drawText(client.textRenderer, expanded ? "-" : "+", x + width - 6, y + 2, 0xFFBBBBBB, false);
+        }
 
         if (expanded) {
             int settingY = y + height;
             for (Setting<?> setting : module.settings()) {
-                context.fill(x + 2, settingY, x + width - 2, settingY + settingHeight(configManager), 0xCC111111);
+                context.fill(x + 4, settingY, x + width - 4, settingY + settingHeight(configManager), 0x55000000);
                 String value = setting.name() + ": " + displayValue(setting);
-                int maxChars = Math.max(18, (width - 12) / 6);
+                int maxChars = Math.max(16, (width - 14) / 6);
                 if (value.length() > maxChars) value = value.substring(0, maxChars - 3) + "...";
-                context.drawText(client.textRenderer, Text.literal(value), x + 5, settingY + 2, 0xFFD8D8D8, false);
+                context.drawText(client.textRenderer, Text.literal(value), x + 8, settingY + 2, 0xFFD8D8D8, false);
                 settingY += settingHeight(configManager);
             }
         }
@@ -60,7 +58,7 @@ public final class ModuleButton {
         if (relativeY < 0 || relativeY > fullHeight(configManager)) return false;
         if (relativeY <= height(configManager)) {
             if (button == 0) module.toggle();
-            if (button == 1) expanded = !expanded;
+            if (button == 1 && !module.settings().isEmpty()) expanded = !expanded;
             return true;
         }
         if (!expanded || (button != 0 && button != 1)) return false;
@@ -89,17 +87,12 @@ public final class ModuleButton {
         return Math.max(10, (int) Math.round(base * configManager.guiScale()));
     }
 
-    private static String compactStatus(ModuleStatus status) {
-        return switch (status) {
-            case WORKING -> "Working";
-            case PARTIAL -> "Partial";
-            case PLACEHOLDER -> "Place";
-            case UNSAFE_DISABLED -> "Unsafe";
-        };
-    }
-
-    private static int withAlpha(int argb, int alpha) {
-        return (alpha << 24) | (argb & 0x00FFFFFF);
+    private static void drawLegacyToggle(DrawContext context, int x, int y, boolean enabled, ModuleStatus status, int accent) {
+        int color = status == ModuleStatus.UNSAFE_DISABLED ? 0xFFFF453A : enabled ? accent : 0xFFBBBBBB;
+        int background = enabled ? 0xCC000000 | (accent & 0x00FFFFFF) : 0xD8000000;
+        context.fill(x, y, x + TOGGLE_WIDTH, y + TOGGLE_HEIGHT, background);
+        drawBorder(context, x, y, TOGGLE_WIDTH, TOGGLE_HEIGHT, color);
+        context.fill(enabled ? x + 9 : x + 2, y + 2, enabled ? x + 14 : x + 7, y + 5, color);
     }
 
     private static void drawBorder(DrawContext context, int x, int y, int width, int height, int color) {

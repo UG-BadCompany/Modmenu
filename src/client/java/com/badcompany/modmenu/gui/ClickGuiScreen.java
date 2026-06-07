@@ -20,6 +20,8 @@ public final class ClickGuiScreen extends Screen {
     private static final int LEGACY_X = 12;
     private static final int LEGACY_Y = 12;
     private static final int CONTROL_HEIGHT = 13;
+    private static final int LEGACY_PANEL_WIDTH = 150;
+    private static final int LEGACY_PANEL_HEIGHT = 238;
     private final ModuleManager moduleManager;
     private final ConfigManager configManager;
     private final List<CategoryPanel> panels = new ArrayList<>();
@@ -36,22 +38,22 @@ public final class ClickGuiScreen extends Screen {
     @Override
     protected void init() {
         panels.clear();
-        int panelWidth = Math.max(112, (int) Math.round(configManager.panelWidth() * configManager.guiScale()));
+        int panelWidth = Math.max(120, (int) Math.round(configManager.panelWidth() * configManager.guiScale()));
         int x = LEGACY_X;
-        int y = 36;
+        int y = 48;
         for (Category category : Category.values()) {
             if (moduleManager.modules(category).isEmpty()) continue;
             CategoryPanel panel = new CategoryPanel(category, moduleManager.modules(category), x, y);
             ConfigManager.PanelConfig saved = configManager.config().gui.panels.get(category.name());
             panel.apply(saved);
             panels.add(panel);
-            x += panelWidth + 8;
-            if (x > width - panelWidth - 8) {
+            x += panelWidth + 6;
+            if (x > width - panelWidth - 6) {
                 x = LEGACY_X;
-                y += 112;
+                y += LEGACY_PANEL_HEIGHT + 6;
             }
         }
-        searchBox = new TextFieldWidget(textRenderer, LEGACY_X + 2, 21, Math.min(134, width - 24), 12, Text.literal("Search modules"));
+        searchBox = new TextFieldWidget(textRenderer, LEGACY_X + 4, 33, Math.min(LEGACY_PANEL_WIDTH - 8, width - 24), 12, Text.literal("Search modules"));
         searchBox.setPlaceholder(Text.literal("Search..."));
         searchBox.setMaxLength(64);
         rebuildControls();
@@ -60,24 +62,24 @@ public final class ClickGuiScreen extends Screen {
 
     private void rebuildControls() {
         controls.clear();
-        int x = LEGACY_X + 150;
-        int y = 20;
-        controls.add(new ControlButton(x, y, 84, "Scale: " + trimScale(configManager.guiScale()), () -> configManager.cycleGuiScale()));
-        x += 88;
-        controls.add(new ControlButton(x, y, 86, "Accent", () -> configManager.cycleAccentColor()));
-        x += 90;
-        controls.add(new ControlButton(x, y, 82, "Width: " + configManager.panelWidth(), () -> configManager.cyclePanelWidth()));
-        x += 86;
-        controls.add(new ControlButton(x, y, 86, configManager.compactMode() ? "Compact" : "Roomy", () -> configManager.toggleCompactMode()));
-        x += 90;
-        controls.add(new ControlButton(x, y, 78, "Reset", () -> {
+        int x = LEGACY_X + LEGACY_PANEL_WIDTH + 6;
+        int y = LEGACY_Y + 4;
+        controls.add(new ControlButton(x, y, 62, "Scale " + trimScale(configManager.guiScale()), () -> configManager.cycleGuiScale()));
+        x += 66;
+        controls.add(new ControlButton(x, y, 48, "Accent", () -> configManager.cycleAccentColor()));
+        x += 52;
+        controls.add(new ControlButton(x, y, 64, "Width " + configManager.panelWidth(), () -> configManager.cyclePanelWidth()));
+        x += 68;
+        controls.add(new ControlButton(x, y, 56, configManager.compactMode() ? "Compact" : "Roomy", () -> configManager.toggleCompactMode()));
+        x += 60;
+        controls.add(new ControlButton(x, y, 44, "Reset", () -> {
             configManager.resetGuiLayout();
             init();
         }));
-        x += 82;
-        controls.add(new ControlButton(x, y, 78, "BG: " + configManager.guiBackground().label(), () -> configManager.cycleGuiBackground()));
-        x += 82;
-        controls.add(new ControlButton(x, y, 86, "Dashboard", () -> MinecraftClient.getInstance().setScreen(new IntelligenceDashboardScreen(this))));
+        x += 48;
+        controls.add(new ControlButton(x, y, 68, "BG " + configManager.guiBackground().label(), () -> configManager.cycleGuiBackground()));
+        x += 72;
+        controls.add(new ControlButton(x, y, 64, "Intel", () -> MinecraftClient.getInstance().setScreen(new IntelligenceDashboardScreen(this))));
     }
 
     @Override
@@ -95,10 +97,11 @@ public final class ClickGuiScreen extends Screen {
     }
 
     private void renderLegacyHeader(DrawContext context) {
-        int headerWidth = Math.min(width - 24, 720);
-        context.fill(LEGACY_X, LEGACY_Y, LEGACY_X + headerWidth, 36, 0xD8000000);
-        drawBorder(context, LEGACY_X, LEGACY_Y, headerWidth, 24, configManager.accentColor());
-        context.drawText(textRenderer, "Family Fun Pack / BadCompany", LEGACY_X + 5, LEGACY_Y + 5, 0xFFEEEEEE, false);
+        int headerWidth = Math.min(width - 24, LEGACY_PANEL_WIDTH);
+        context.fill(LEGACY_X, LEGACY_Y, LEGACY_X + headerWidth, 47, 0xD8000000);
+        drawBorder(context, LEGACY_X, LEGACY_Y, headerWidth, 35, 0xFFBBBBBB);
+        context.drawText(textRenderer, "Family Fun Pack", LEGACY_X + 33, LEGACY_Y + 6, 0xFFEEEEEE, false);
+        context.drawText(textRenderer, "BadCompany", LEGACY_X + 45, LEGACY_Y + 18, configManager.accentColor(), false);
     }
 
     private void renderConfiguredBackground(DrawContext context, float animation) {
@@ -201,8 +204,8 @@ public final class ClickGuiScreen extends Screen {
         private void render(DrawContext context, int mouseX, int mouseY) {
             boolean hovered = clicked(mouseX, mouseY);
             context.fill(x, y, x + width, y + CONTROL_HEIGHT, hovered ? 0xCC222222 : 0x99000000);
-            drawBorder(context, x, y, width, CONTROL_HEIGHT, configManager.accentColor());
-            context.drawText(textRenderer, label, x + 3, y + 3, 0xFFEEEEEE, false);
+            drawBorder(context, x, y, width, CONTROL_HEIGHT, 0xFFBBBBBB);
+            context.drawText(textRenderer, label, x + 3, y + 3, hovered ? configManager.accentColor() : 0xFFEEEEEE, false);
         }
 
         private boolean clicked(double mouseX, double mouseY) {
