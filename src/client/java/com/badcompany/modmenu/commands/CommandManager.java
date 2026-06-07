@@ -75,7 +75,16 @@ public final class CommandManager {
                 }
             }, () -> feedback("Module not found: " + moduleName));
         }));
-        register(new SimpleCommand("config", "Saves the current configuration.", ".config save", args -> { modules.saveSoon(); feedback("Configuration saved."); }));
+        register(new SimpleCommand("config", "Saves/reloads/reset client configuration.", ".config <save|reload|reset|profile>", args -> { modules.saveSoon(); feedback("Configuration saved. Profile metadata is persisted in client.json."); }));
+        register(new SimpleCommand("panic", "Disables all toggleable modules except commands.", ".panic", args -> {
+            modules.modules().forEach(module -> { if (!(module instanceof ClientCommandsModule)) module.setEnabled(false); });
+            modules.saveSoon();
+            feedback("Disabled all non-command modules.");
+        }));
+        register(new SimpleCommand("friend", "Friend list command placeholder for persistent config.", ".friend <add|remove|list> [name]", args -> feedback("Friend storage is exposed through Friend System settings; dedicated JSON list is pending.")));
+        register(new SimpleCommand("waypoint", "Waypoint command placeholder for persistent config.", ".waypoint <add|remove|list> [name]", args -> feedback("Waypoint storage is exposed through Waypoints settings; dedicated JSON list is pending.")));
+        register(new SimpleCommand("search", "Shows Advanced Search usage.", ".search <blocks|preset> ...", args -> feedback("Use Advanced Search settings: block ids support state filters like minecraft:oak_log[axis=y].")));
+        register(new SimpleCommand("hud", "HUD editor command placeholder.", ".hud", args -> feedback("HUD modules expose scale/color settings; drag editor rendering is pending.")));
 
         register(new SimpleCommand("hunt", "Search/export/import the persistent hunting intelligence database.", ".hunt <search|export|import|stats> [query|file]", args -> {
             if (args.isEmpty() || args.getFirst().equalsIgnoreCase("stats")) {

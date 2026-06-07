@@ -4,6 +4,7 @@ import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.Module;
 import com.badcompany.modmenu.module.ModuleStatus;
 import com.badcompany.modmenu.settings.BooleanSetting;
+import com.badcompany.modmenu.settings.ColorSetting;
 import com.badcompany.modmenu.settings.NumberSetting;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
@@ -35,12 +36,20 @@ public final class EntityTraceModule extends Module {
             true
     ));
     private final NumberSetting watchRange = addSetting(new NumberSetting(
-            "Watch range",
+            "Range",
             "Maximum radius of loaded entities to track around the local player.",
             192.0D,
             32.0D,
             512.0D
     ));
+    private final ColorSetting playerTracerColor = addSetting(new ColorSetting("Player tracer color", "ARGB tracer color for players.", 0xFF55FFFF));
+    private final ColorSetting hostileTracerColor = addSetting(new ColorSetting("Hostile mob tracer color", "ARGB tracer color for hostile mobs.", 0xFFFF5555));
+    private final ColorSetting passiveTracerColor = addSetting(new ColorSetting("Passive mob tracer color", "ARGB tracer color for passive mobs.", 0xFF55FF55));
+    private final ColorSetting itemTracerColor = addSetting(new ColorSetting("Item tracer color", "ARGB tracer color for dropped items.", 0xFFFFFF55));
+    private final ColorSetting otherTracerColor = addSetting(new ColorSetting("Other entity tracer color", "ARGB tracer color for other entities.", 0xFFFFFFFF));
+    private final BooleanSetting distanceFade = addSetting(new BooleanSetting("Distance fade", "Fade tracers by target distance when render hooks are available.", true));
+    private final NumberSetting lineWidth = addSetting(new NumberSetting("Line width", "Tracer line width preference.", 1.0D, 1.0D, 6.0D));
+    private final BooleanSetting boxOutline = addSetting(new BooleanSetting("Box/outline", "Draw entity boxes/outlines when a world-render hook is available.", true));
 
     private final Map<UUID, EntitySnapshot> knownEntities = new HashMap<>();
     private int warmupTicks;

@@ -20,8 +20,8 @@ public final class ClickGuiScreen extends Screen {
     private static final int LEGACY_X = 12;
     private static final int LEGACY_Y = 12;
     private static final int CONTROL_HEIGHT = 13;
-    private static final int LEGACY_PANEL_WIDTH = 150;
-    private static final int LEGACY_PANEL_HEIGHT = 238;
+    private static final int LEGACY_PANEL_WIDTH = 126;
+    private static final int LEGACY_PANEL_HEIGHT = 176;
     private final ModuleManager moduleManager;
     private final ConfigManager configManager;
     private final List<CategoryPanel> panels = new ArrayList<>();
@@ -38,7 +38,7 @@ public final class ClickGuiScreen extends Screen {
     @Override
     protected void init() {
         panels.clear();
-        int panelWidth = Math.max(120, (int) Math.round(configManager.panelWidth() * configManager.guiScale()));
+        int panelWidth = Math.max(104, (int) Math.round(configManager.panelWidth() * configManager.guiScale()));
         int x = LEGACY_X;
         int y = 48;
         for (Category category : Category.values()) {
@@ -64,22 +64,29 @@ public final class ClickGuiScreen extends Screen {
         controls.clear();
         int x = LEGACY_X + LEGACY_PANEL_WIDTH + 6;
         int y = LEGACY_Y + 4;
-        controls.add(new ControlButton(x, y, 62, "Scale " + trimScale(configManager.guiScale()), () -> configManager.cycleGuiScale()));
-        x += 66;
-        controls.add(new ControlButton(x, y, 48, "Accent", () -> configManager.cycleAccentColor()));
-        x += 52;
-        controls.add(new ControlButton(x, y, 64, "Width " + configManager.panelWidth(), () -> configManager.cyclePanelWidth()));
-        x += 68;
-        controls.add(new ControlButton(x, y, 56, configManager.compactMode() ? "Compact" : "Roomy", () -> configManager.toggleCompactMode()));
-        x += 60;
-        controls.add(new ControlButton(x, y, 44, "Reset", () -> {
-            configManager.resetGuiLayout();
-            init();
-        }));
-        x += 48;
-        controls.add(new ControlButton(x, y, 68, "BG " + configManager.guiBackground().label(), () -> configManager.cycleGuiBackground()));
-        x += 72;
-        controls.add(new ControlButton(x, y, 64, "Intel", () -> MinecraftClient.getInstance().setScreen(new IntelligenceDashboardScreen(this))));
+        x = addControl(x, y, 54, "Scale " + trimScale(configManager.guiScale()), () -> configManager.cycleGuiScale());
+        x = addControl(x, y, 42, "Font", () -> configManager.cycleFontScale());
+        x = addControl(x, y, 54, "Row " + configManager.rowHeight(), () -> configManager.cycleRowHeight());
+        x = addControl(x, y, 58, "Width " + configManager.panelWidth(), () -> configManager.cyclePanelWidth());
+        x = addControl(x, y, 46, "Accent", () -> configManager.cycleAccentColor());
+        x = addControl(x, y, 44, "Border", () -> configManager.cycleBorderColor());
+        x = addControl(x, y, 46, "Header", () -> configManager.cycleHeaderColor());
+        x = addControl(x, y, 46, "On", () -> configManager.cycleEnabledColor());
+        x = addControl(x, y, 46, "Off", () -> configManager.cycleDisabledColor());
+        x = addControl(x, y, 54, "Alpha", () -> configManager.cycleBackgroundOpacity());
+        x = addControl(x, y, 52, configManager.compactMode() ? "Compact" : "Roomy", () -> configManager.toggleCompactMode());
+        x = addControl(x, y, 42, "Reset", () -> { configManager.resetGuiLayout(); init(); });
+        x = addControl(x, y, 60, "BG " + configManager.guiBackground().label(), () -> configManager.cycleGuiBackground());
+        addControl(x, y, 42, "Intel", () -> MinecraftClient.getInstance().setScreen(new IntelligenceDashboardScreen(this)));
+    }
+
+    private int addControl(int x, int y, int buttonWidth, String label, Runnable action) {
+        if (x + buttonWidth > width - 8) {
+            x = LEGACY_X + LEGACY_PANEL_WIDTH + 6;
+            y += CONTROL_HEIGHT + 3;
+        }
+        controls.add(new ControlButton(x, y, buttonWidth, label, action));
+        return x + buttonWidth + 4;
     }
 
     @Override
@@ -98,8 +105,8 @@ public final class ClickGuiScreen extends Screen {
 
     private void renderLegacyHeader(DrawContext context) {
         int headerWidth = Math.min(width - 24, LEGACY_PANEL_WIDTH);
-        context.fill(LEGACY_X, LEGACY_Y, LEGACY_X + headerWidth, 47, 0xD8000000);
-        drawBorder(context, LEGACY_X, LEGACY_Y, headerWidth, 35, 0xFFBBBBBB);
+        context.fill(LEGACY_X, LEGACY_Y, LEGACY_X + headerWidth, 47, (configManager.backgroundOpacity() << 24));
+        drawBorder(context, LEGACY_X, LEGACY_Y, headerWidth, 35, configManager.borderColor());
         context.drawText(textRenderer, "Family Fun Pack", LEGACY_X + 33, LEGACY_Y + 6, 0xFFEEEEEE, false);
         context.drawText(textRenderer, "BadCompany", LEGACY_X + 45, LEGACY_Y + 18, configManager.accentColor(), false);
     }
@@ -108,9 +115,9 @@ public final class ClickGuiScreen extends Screen {
         GuiBackground background = configManager.guiBackground();
         int alpha = switch (background) {
             case NONE -> 0;
-            case LIGHT_DIM -> (int) (0x24 * animation);
-            case DARK_DIM -> (int) (0x58 * animation);
-            case BLUR -> (int) (0x40 * animation);
+            case LIGHT_DIM -> (int) (Math.min(0x40, configManager.backgroundOpacity() / 4) * animation);
+            case DARK_DIM -> (int) (Math.min(0x90, configManager.backgroundOpacity() / 2) * animation);
+            case BLUR -> (int) (Math.min(0x70, configManager.backgroundOpacity() / 3) * animation);
         };
         if (alpha > 0) context.fill(0, 0, width, height, (alpha << 24) | 0x000000);
     }
@@ -204,7 +211,7 @@ public final class ClickGuiScreen extends Screen {
         private void render(DrawContext context, int mouseX, int mouseY) {
             boolean hovered = clicked(mouseX, mouseY);
             context.fill(x, y, x + width, y + CONTROL_HEIGHT, hovered ? 0xCC222222 : 0x99000000);
-            drawBorder(context, x, y, width, CONTROL_HEIGHT, 0xFFBBBBBB);
+            drawBorder(context, x, y, width, CONTROL_HEIGHT, configManager.borderColor());
             context.drawText(textRenderer, label, x + 3, y + 3, hovered ? configManager.accentColor() : 0xFFEEEEEE, false);
         }
 

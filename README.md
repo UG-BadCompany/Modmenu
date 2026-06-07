@@ -41,7 +41,12 @@ BadCompany chat commands use the `.` prefix by default. The `FFP Commands` modul
 | `.modules` | Lists registered modules. |
 | `.toggle <module>` | Toggles a module by display name. |
 | `.bind <module> <key.translation.id>` | Binds a module to a Minecraft key translation id, such as `key.keyboard.g`. |
-| `.config save` | Saves the current configuration immediately. |
+| `.config <save|reload|reset|profile>` | Saves the current configuration immediately; profile/reset/reload hooks are documented but conservative. |
+| `.friend <add|remove|list>` | Friend-system entry point; persistent JSON storage is represented in config and will be split to friends.json when the dedicated editor lands. |
+| `.waypoint <add|remove|list>` | Waypoint entry point for the Waypoints module/config. |
+| `.search <blocks|preset>` | Shows Advanced Search block-list/state-filter usage. |
+| `.panic` | Disables all non-command modules. |
+| `.hud` | HUD editor entry point for HUD module layout/color/scale settings. |
 
 ## Current Module List
 
@@ -64,6 +69,19 @@ Status labels are intentionally conservative: modules are not marked working unl
 | True Durability | Render | Working | Adds exact durability and unbreakable markers to modern item tooltips. |
 | Undead | Player | Partial | Dismisses the client death screen locally without sending automatic respawn packets. |
 | Hunting intelligence modules | Hunting | Partial | The database/scanning pipeline is functional, but overlay-heavy modules remain partial until visual render integrations are complete. |
+| Fullbright | Render | Working | Applies client-side night vision while enabled. |
+| Coordinates HUD | Render | Working | Displays coordinates in the action bar. |
+| Direction HUD | Render | Working | Displays facing direction in the action bar. |
+| FPS/TPS/Ping HUD | Render | Partial | Displays FPS; TPS/ping need server telemetry hooks. |
+| ESP / Tracers / Storage ESP / Item ESP / Nametags / Block Highlight | Render | Partial | Real per-module color/range/line-width settings are saved; world-render backend remains pending. |
+| Freecam | Render | Unsafe/Disabled | Camera/entity decoupling needs mixin-backed movement isolation and is not faked. |
+| Sprint | Movement | Working | Uses vanilla sprint while forward is pressed. |
+| Sneak | Movement | Working | Holds vanilla sneak key while enabled. |
+| Auto Walk | Movement | Working | Holds vanilla forward key while enabled and releases it on disable. |
+| Step / No Fall / Boat Fly | Movement | Unsafe/Disabled | Movement/fall/fly packet behavior is server-validated and not portable on 1.21.x. |
+| Auto Respawn | World | Working | Requests vanilla respawn when the death screen is active. |
+| Death Coordinates | World | Working | Prints death coordinates once per death. |
+| Friend System / Waypoints / Base Notes / Config Profiles / HUD Editor | Player/World/Misc | Partial | Persistent config sections and commands exist; dedicated editors/rendering remain partial. |
 
 
 ### Hunting Intelligence Module Status
@@ -102,7 +120,7 @@ Status labels are intentionally conservative: modules are not marked working unl
 
 ## ClickGUI
 
-The ClickGUI opens with the backslash (`\`) keybind by default and now follows the compact legacy `1.12.2` Family Fun Pack layout: black translucent panels, one-pixel accent borders, small category headers, compact module rows, and non-stretched text. The top controls expose the new GUI settings: UI scale, accent color, panel width, compact/roomy mode, layout reset, background mode, and the intelligence dashboard. Module rows use compact legacy labels plus small on/off switches; unsafe modules render with warning coloring and refuse to enable, so placeholder or unsafe modules are not presented as complete ports.
+The ClickGUI opens with the backslash (`\`) keybind by default and follows a compact legacy `1.12.2` Family Fun Pack layout: black translucent panels, one-pixel accent borders, small category headers, compact module rows, and non-stretched text. The top controls expose GUI scale, font scale, row height, panel width, accent color, border color, category-header color, enabled/disabled module colors, background opacity, compact/roomy mode, layout reset, background mode, and the intelligence dashboard. Module rows use compact legacy labels plus small on/off switches; unsafe modules render with warning coloring and refuse to enable, so placeholder or unsafe modules are not presented as complete ports. Panel positions/expanded state, module settings, keybinds, GUI color presets, search preset metadata, friends, waypoints, and profile metadata are persisted through `client.json`.
 
 ## GitHub Actions
 

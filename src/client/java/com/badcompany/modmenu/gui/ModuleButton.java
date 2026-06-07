@@ -12,7 +12,7 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 
 public final class ModuleButton {
-    private static final int BASE_HEIGHT = 13;
+    private static final int BASE_HEIGHT = 11;
     private static final int TOGGLE_WIDTH = 16;
     private static final int TOGGLE_HEIGHT = 7;
     private final Module module;
@@ -34,9 +34,9 @@ public final class ModuleButton {
         if (module.status() == ModuleStatus.UNSAFE_DISABLED) rowColor = hovered ? 0x44331111 : 0x22180000;
         if (rowColor != 0) context.fill(x + 2, y, x + width - 2, y + height, rowColor);
 
-        int labelColor = module.status() == ModuleStatus.UNSAFE_DISABLED ? 0xFFFFB0B0 : 0xFFEEEEEE;
+        int labelColor = module.status() == ModuleStatus.UNSAFE_DISABLED ? 0xFFFFB0B0 : module.enabled() ? configManager.enabledModuleColor() : configManager.disabledModuleColor();
         context.drawText(client.textRenderer, module.name(), x + 6, y + 2, labelColor, false);
-        drawLegacyToggle(context, x + width - 22, y + 3, module.enabled(), module.status(), configManager.accentColor());
+        drawLegacyToggle(context, x + width - 22, y + 2, module.enabled(), module.status(), configManager.enabledModuleColor(), configManager.disabledModuleColor());
         if (!module.settings().isEmpty()) {
             context.drawText(client.textRenderer, expanded ? "-" : "+", x + width - 6, y + 2, 0xFFBBBBBB, false);
         }
@@ -78,8 +78,8 @@ public final class ModuleButton {
     }
 
     private static int height(ConfigManager configManager) {
-        int base = configManager.compactMode() ? BASE_HEIGHT : 16;
-        return Math.max(11, (int) Math.round(base * configManager.guiScale()));
+        int base = configManager.compactMode() ? configManager.rowHeight() : Math.max(14, configManager.rowHeight());
+        return Math.max(10, (int) Math.round(base * configManager.guiScale()));
     }
 
     private static int settingHeight(ConfigManager configManager) {
@@ -87,8 +87,8 @@ public final class ModuleButton {
         return Math.max(10, (int) Math.round(base * configManager.guiScale()));
     }
 
-    private static void drawLegacyToggle(DrawContext context, int x, int y, boolean enabled, ModuleStatus status, int accent) {
-        int color = status == ModuleStatus.UNSAFE_DISABLED ? 0xFFFF453A : enabled ? accent : 0xFFBBBBBB;
+    private static void drawLegacyToggle(DrawContext context, int x, int y, boolean enabled, ModuleStatus status, int accent, int offColor) {
+        int color = status == ModuleStatus.UNSAFE_DISABLED ? 0xFFFF453A : enabled ? accent : offColor;
         int background = enabled ? 0xCC000000 | (accent & 0x00FFFFFF) : 0xD8000000;
         context.fill(x, y, x + TOGGLE_WIDTH, y + TOGGLE_HEIGHT, background);
         drawBorder(context, x, y, TOGGLE_WIDTH, TOGGLE_HEIGHT, color);
