@@ -1,4 +1,5 @@
 {
   "key.badcompany.open_gui": "Open BadCompany GUI",
-  "category.badcompany": "BadCompany"
+  "category.badcompany": "BadCompany",
+  "category.badcompany.keybindings": "BadCompany"
 }

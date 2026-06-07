@@ -6,7 +6,6 @@ import com.badcompany.modmenu.module.Module;
 import com.badcompany.modmenu.module.ModuleManager;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -42,7 +41,7 @@ public final class ConfigManager {
                 }
             }
             apply(openGuiKey);
-        } catch (IOException | JsonSyntaxException | RuntimeException ex) {
+        } catch (IOException | RuntimeException ex) {
             BadCompanyClient.LOGGER.warn("Unable to load BadCompany config from {}; defaults will be used", configFile, ex);
             config = new ClientConfig();
         }

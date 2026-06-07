@@ -5,11 +5,11 @@ BadCompany is a modern Fabric client rebuild of the legacy 1.12.2 Forge utility 
 ## Target Platform
 
 - Minecraft Java `1.21.11`
-- Fabric Loader `0.19.2`
+- Fabric Loader `0.19.3`
 - Fabric API `0.141.4+1.21.11`
 - Fabric Loom `1.14.8`
 - Java `21`
-- Yarn mappings `1.21.11+build.3`
+- Yarn mappings `1.21.11+build.6`
 
 ## Development
 
