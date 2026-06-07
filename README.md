@@ -22,7 +22,7 @@ The default GUI keybind is backslash (`\\`) and can be changed from Minecraft's 
 
 ## Current Migration Status
 
-The Fabric 1.21.x migration is stable: the project has a Java 21 Gradle/Fabric Loom build path, GitHub Actions build coverage, a runClient smoke workflow, a module framework, JSON config, and ClickGUI. True Durability and Advanced Search are active ports. Book Formatting, Entity Trace, Stalker, and Undead now use safe 1.21.11 client APIs for local notices, tab-list tracking, entity jump tracking, and death-screen handling. Exploit/network-sensitive modules remain safe placeholders until a direct modern API migration is available.
+The Fabric 1.21.x migration is stable: the project has a Java 21 Gradle/Fabric Loom build path, GitHub Actions build coverage, a runClient smoke workflow, a module framework, JSON config, and ClickGUI. True Durability, Advanced Search, Book Formatting, Entity Trace, Stalker, Undead, Pig POV, and PumpkinAura are active or safe-behavior ports using 1.21.11 client APIs. Silent Close, Packet Canceler, Portal Invulnerability, and Bowbomb are safely stubbed/monitor-only where the original packet exploit behavior is no longer valid for modern Fabric without unsafe packet suppression.
 
 ## Migration Checklist
 
@@ -40,15 +40,19 @@ The Fabric 1.21.x migration is stable: the project has a Java 21 Gradle/Fabric L
 
 ### Legacy Modules
 
-- [x] True Durability
-- [x] Advanced Search
-- [x] Book Formatting
-- [ ] Silent Close
-- [ ] Packet Canceler
-- [ ] Portal Invulnerability
-- [ ] Pig POV
-- [x] Entity Trace
-- [x] Stalker
-- [x] Undead
-- [ ] Bowbomb
-- [ ] PumpkinAura
+Legend: **Fully ported** means the Fabric module provides the original safe client-side behavior. **Partially ported** means a modern equivalent exists but rendering/mixin expansion is still pending. **Safely stubbed** means exploit-heavy packet behavior is intentionally not reproduced; settings and monitor-mode behavior are saved through the modern config system.
+
+| Module | Status | Notes |
+| --- | --- | --- |
+| True Durability | Fully ported | Exact durability tooltip values use modern item components. |
+| Advanced Search | Partially ported | Block/state filtering and cached target scanning are active; dedicated render overlays remain pending. |
+| Book Formatting | Fully ported | Modern book-edit screen notices preserve safe formatting guidance. |
+| Silent Close | Safely stubbed | Tracks handled-screen closes and last container details without suppressing vanilla close packets. |
+| Packet Canceler | Safely stubbed | Saves packet filter lists in safe mode without dropping protocol traffic. |
+| Portal Invulnerability | Safely stubbed | Monitors portal contact and dimension transitions without withholding teleport confirmations. |
+| Pig POV | Fully ported | Pig riding switches to a safe first-person camera helper without changing entity dimensions. |
+| Entity Trace | Fully ported | Reports large entity movement jumps from the loaded client entity cache. |
+| Stalker | Fully ported | Tracks tab-list joins/leaves and gamemode changes through the modern player list API. |
+| Undead | Fully ported | Safely dismisses the death screen client-side without auto-respawn packets. |
+| Bowbomb | Safely stubbed | Detects normal charged bow releases and refuses legacy packet flooding. |
+| PumpkinAura | Partially ported | Uses normal vanilla interaction to place held pumpkins on legal supports with configurable safety gates; render overlay remains pending. |
