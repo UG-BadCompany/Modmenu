@@ -3,6 +3,7 @@ package com.badcompany.modmenu.module.modules;
 import com.badcompany.modmenu.BadCompanyClient;
 import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.Module;
+import com.badcompany.modmenu.module.ModuleStatus;
 import com.badcompany.modmenu.settings.BooleanSetting;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.component.DataComponentTypes;
@@ -26,7 +27,7 @@ public final class TrueDurabilityModule extends Module {
     private boolean callbackRegistered;
 
     public TrueDurabilityModule() {
-        super("True Durability", "Shows exact durability values in modern tooltips.", Category.RENDER, true);
+        super("True Durability", "Shows exact durability values in modern tooltips.", Category.RENDER, ModuleStatus.WORKING, true);
         registerTooltipCallback();
     }
 

@@ -2,6 +2,7 @@ package com.badcompany.modmenu.module.modules;
 
 import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.Module;
+import com.badcompany.modmenu.module.ModuleStatus;
 import com.badcompany.modmenu.settings.BooleanSetting;
 import com.badcompany.modmenu.settings.ColorSetting;
 import com.badcompany.modmenu.settings.NumberSetting;
@@ -74,7 +75,7 @@ public final class PumpkinAuraModule extends Module {
     private BlockPos lastCandidate;
 
     public PumpkinAuraModule() {
-        super("PumpkinAura", "Safely places held pumpkins on nearby legal supports using normal vanilla interaction.", Category.WORLD);
+        super("PumpkinAura", "Safely places held pumpkins on nearby legal supports using normal vanilla interaction.", Category.WORLD, ModuleStatus.PARTIAL);
     }
 
     @Override

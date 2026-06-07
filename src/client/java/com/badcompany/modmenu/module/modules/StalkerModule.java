@@ -2,6 +2,7 @@ package com.badcompany.modmenu.module.modules;
 
 import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.Module;
+import com.badcompany.modmenu.module.ModuleStatus;
 import com.badcompany.modmenu.settings.BooleanSetting;
 import net.minecraft.client.network.PlayerListEntry;
 import net.minecraft.text.Text;
@@ -33,7 +34,7 @@ public final class StalkerModule extends Module {
     private int warmupTicks;
 
     public StalkerModule() {
-        super("Stalker", "Tracks tab-list joins, leaves, and game mode changes using modern client state.", Category.PLAYER);
+        super("Stalker", "Tracks tab-list joins, leaves, and game mode changes using modern client state.", Category.PLAYER, ModuleStatus.WORKING);
     }
 
     @Override

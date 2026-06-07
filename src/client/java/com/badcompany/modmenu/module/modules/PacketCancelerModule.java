@@ -2,6 +2,7 @@ package com.badcompany.modmenu.module.modules;
 
 import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.Module;
+import com.badcompany.modmenu.module.ModuleStatus;
 import com.badcompany.modmenu.settings.BooleanSetting;
 import com.badcompany.modmenu.settings.StringSetting;
 import net.minecraft.text.Text;
@@ -32,7 +33,7 @@ public final class PacketCancelerModule extends Module {
     private Set<String> serverbound = Set.of();
 
     public PacketCancelerModule() {
-        super("Packet Canceler", "Stores packet-cancel filters safely without dropping modern protocol traffic.", Category.EXPLOIT);
+        super("Packet Canceler", "Stores packet-cancel filters safely without dropping modern protocol traffic.", Category.EXPLOIT, ModuleStatus.PARTIAL);
     }
 
     @Override

@@ -2,6 +2,7 @@ package com.badcompany.modmenu.module.modules;
 
 import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.Module;
+import com.badcompany.modmenu.module.ModuleStatus;
 import com.badcompany.modmenu.settings.BooleanSetting;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.text.Text;
@@ -21,7 +22,7 @@ public final class UndeadModule extends Module {
     private boolean notifiedForDeath;
 
     public UndeadModule() {
-        super("Undead", "Safely dismisses the client death screen without sending respawn packets automatically.", Category.PLAYER);
+        super("Undead", "Safely dismisses the client death screen without sending respawn packets automatically.", Category.PLAYER, ModuleStatus.PARTIAL);
     }
 
     @Override

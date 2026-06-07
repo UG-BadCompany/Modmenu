@@ -2,6 +2,7 @@ package com.badcompany.modmenu.module.modules;
 
 import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.Module;
+import com.badcompany.modmenu.module.ModuleStatus;
 import com.badcompany.modmenu.settings.BooleanSetting;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
@@ -22,7 +23,7 @@ public final class BowbombModule extends Module {
     private int lastUseTicks;
 
     public BowbombModule() {
-        super("Bowbomb", "Safe bow release monitor; unsafe packet burst behavior is intentionally not sent.", Category.EXPLOIT);
+        super("Bowbomb", "Safe bow release monitor; unsafe packet burst behavior is intentionally not sent.", Category.EXPLOIT, ModuleStatus.UNSAFE_DISABLED);
     }
 
     @Override

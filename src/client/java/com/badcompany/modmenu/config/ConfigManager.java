@@ -84,11 +84,72 @@ public final class ConfigManager {
         return GuiBackground.from(config.gui.background);
     }
 
+    public double guiScale() {
+        config = sanitize(config);
+        return config.gui.uiScale;
+    }
+
+    public int panelWidth() {
+        config = sanitize(config);
+        return config.gui.panelWidth;
+    }
+
+    public boolean compactMode() {
+        config = sanitize(config);
+        return config.gui.compactMode;
+    }
+
+    public int accentColor() {
+        config = sanitize(config);
+        return config.accentColor;
+    }
+
+    public void cycleGuiScale() {
+        config = sanitize(config);
+        double current = config.gui.uiScale;
+        config.gui.uiScale = current < 0.9D ? 1.0D : current < 1.15D ? 1.25D : 0.75D;
+    }
+
+    public void cyclePanelWidth() {
+        config = sanitize(config);
+        int current = config.gui.panelWidth;
+        config.gui.panelWidth = current < 136 ? 150 : current < 170 ? 180 : 120;
+    }
+
+    public void cycleAccentColor() {
+        int[] colors = { 0xFFBBBBBB, 0xFF7C4DFF, 0xFF55FFFF, 0xFFFF66AA, 0xFFFFCC4D, 0xFF4CD964 };
+        int current = accentColor();
+        for (int i = 0; i < colors.length; i++) {
+            if (colors[i] == current) {
+                config.accentColor = colors[(i + 1) % colors.length];
+                return;
+            }
+        }
+        config.accentColor = colors[0];
+    }
+
+    public void toggleCompactMode() {
+        config = sanitize(config);
+        config.gui.compactMode = !config.gui.compactMode;
+    }
+
+    public void resetGuiLayout() {
+        config = sanitize(config);
+        config.gui.panels.clear();
+    }
+
+    private static double clamp(double value, double min, double max) {
+        if (Double.isNaN(value)) return min;
+        return Math.max(min, Math.min(max, value));
+    }
+
     private static ClientConfig sanitize(ClientConfig loaded) {
         ClientConfig safe = loaded == null ? new ClientConfig() : loaded;
         if (safe.gui == null) safe.gui = new GuiConfig();
         if (safe.gui.panels == null) safe.gui.panels = new HashMap<>();
         safe.gui.background = GuiBackground.from(safe.gui.background).id();
+        safe.gui.uiScale = clamp(safe.gui.uiScale, 0.75D, 1.25D);
+        safe.gui.panelWidth = (int) clamp(safe.gui.panelWidth, 120, 180);
         if (safe.modules == null) safe.modules = new HashMap<>();
         return safe;
     }
@@ -183,6 +244,9 @@ public final class ConfigManager {
     public static final class GuiConfig {
         public String background = GuiBackground.LIGHT_DIM.id();
         public Map<String, PanelConfig> panels = new HashMap<>();
+        public double uiScale = 1.0D;
+        public int panelWidth = 150;
+        public boolean compactMode = true;
     }
 
     public enum GuiBackground {

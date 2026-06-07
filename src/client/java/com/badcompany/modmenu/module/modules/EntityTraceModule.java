@@ -2,6 +2,7 @@ package com.badcompany.modmenu.module.modules;
 
 import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.Module;
+import com.badcompany.modmenu.module.ModuleStatus;
 import com.badcompany.modmenu.settings.BooleanSetting;
 import com.badcompany.modmenu.settings.NumberSetting;
 import net.minecraft.entity.Entity;
@@ -45,7 +46,7 @@ public final class EntityTraceModule extends Module {
     private int warmupTicks;
 
     public EntityTraceModule() {
-        super("Entity Trace", "Reports large client-side entity position jumps without sending packets.", Category.RENDER);
+        super("Entity Trace", "Reports large client-side entity position jumps without sending packets.", Category.RENDER, ModuleStatus.PARTIAL);
     }
 
     @Override

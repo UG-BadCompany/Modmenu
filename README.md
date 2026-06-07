@@ -45,26 +45,64 @@ BadCompany chat commands use the `.` prefix by default. The `FFP Commands` modul
 
 ## Current Module List
 
+Status labels are intentionally conservative: modules are not marked working unless they have a visible modern client behavior beyond toggling. Unsafe legacy packet/exploit behavior remains disabled instead of being represented as a successful port.
+
 | Module | Category | Status | Notes |
 | --- | --- | --- | --- |
-| Advanced Search | Render | Fully ported | Scans loaded client blocks with configurable block/state filters and caches matches for render integrations. |
-| Book Formatting | Player | Fully ported | Prints a local formatting-code reminder when the modern book edit screen opens. |
-| Bowbomb | Exploit | Fully ported safe equivalent | Detects normal charged bow releases and never sends packet-flood behavior. |
-| Entity Trace | Render | Fully ported | Reports large entity position jumps from the loaded client entity cache. |
-| FFP Commands | Misc | Fully ported | Restores the legacy command enable switch and configurable prefix. |
-| Ignore Players | Misc | Fully ported | Hides chat from configured player names with an optional game-message filter. |
-| Packet Canceler | Exploit | Fully ported safe equivalent | Saves packet filter notes without dropping protocol traffic. |
-| Pig POV | Render | Fully ported | Switches to first person while riding pigs and restores the previous perspective afterward. |
-| Portal Invulnerability | Exploit | Fully ported safe equivalent | Reports portal contact and dimension changes while preserving vanilla teleport handling. |
-| PumpkinAura | World | Fully ported | Places held pumpkins with normal vanilla interactions on legal supports and with configurable safety gates. |
-| Silent Close | Exploit | Fully ported safe equivalent | Tracks handled-screen close transitions without suppressing vanilla close packets. |
-| Stalker | Player | Fully ported | Watches tab-list joins, leaves, and game-mode changes using modern client state. |
-| True Durability | Render | Fully ported | Adds exact durability and unbreakable markers to modern item tooltips. |
-| Undead | Player | Fully ported | Dismisses the client death screen without sending automatic respawn packets. |
+| Advanced Search | Render | Working | Incrementally scans nearby loaded blocks for configured ids/state filters and exposes cached matches for highlights/render integrations. |
+| Book Formatting | Player | Partial | Detects modern book editing screens and shows formatting-code help; direct legacy text injection is not restored yet. |
+| Bowbomb | Exploit | Unsafe/Disabled | The legacy packet-burst behavior is deliberately disabled on modern Minecraft; the GUI prevents enabling it. |
+| Entity Trace | Render | Partial | Tracks loaded entities and reports large position jumps; full legacy tracer rendering still needs a dedicated world-render hook. |
+| FFP Commands | Misc | Working | Restores the legacy command enable switch and configurable prefix. |
+| Ignore Players | Misc | Working | Hides chat from configured player names with an optional game-message filter. |
+| Packet Canceler | Exploit | Partial | Exposes safe clientbound/serverbound filter lists and audit notices; it does not silently drop modern protocol traffic. |
+| Pig POV | Render | Working | Switches to first person while riding pigs and restores the previous perspective afterward. |
+| Portal Invulnerability | Exploit | Partial | Detects portal contact and dimension changes while preserving vanilla teleport handling. |
+| PumpkinAura | World | Partial | Uses normal vanilla interaction to place held pumpkins on legal supports with safety gates; exploit-style automation is not claimed. |
+| Silent Close | Exploit | Partial | Records handled-screen close transitions and last container details; close-packet suppression is not claimed in the port. |
+| Stalker | Player | Working | Watches tab-list joins, leaves, names, and game-mode changes using modern client state. |
+| True Durability | Render | Working | Adds exact durability and unbreakable markers to modern item tooltips. |
+| Undead | Player | Partial | Dismisses the client death screen locally without sending automatic respawn packets. |
+| Hunting intelligence modules | Hunting | Partial | The database/scanning pipeline is functional, but overlay-heavy modules remain partial until visual render integrations are complete. |
+
+
+### Hunting Intelligence Module Status
+
+| Module | Category | Status | Notes |
+| --- | --- | --- | --- |
+| AI Base Predictor | Hunting | Partial | Correlates local database records into predictions; needs more validation before being called working. |
+| Artificial Block Detector | Hunting | Partial | Scans loaded blocks for suspicious artificial materials and records findings. |
+| Automatic Evidence Capture | Hunting | Partial | Captures nearby evidence into the local hunt database; no screenshot/media capture is implemented. |
+| Base Archaeology | Hunting | Partial | Scans for old-base evidence such as obsidian, utility blocks, and terrain scars. |
+| Book Archive | Hunting | Partial | Archives written books found client-side, but not all legacy book workflows are restored. |
+| Chunk Change Tracker | Hunting | Partial | Tracks revisited chunk changes in the local database; visual changed-chunk overlay is pending. |
+| Elytra Flight Logger | Hunting | Partial | Logs flight path samples and distance statistics client-side. |
+| Expedition System | Hunting | Partial | Generates local investigation records from existing evidence; planner UX remains basic. |
+| Exploration Statistics | Hunting | Partial | Records exploration counters and autosaves them locally. |
+| Hidden Entrance Detector | Hunting | Partial | Scans loaded blocks for likely entrance indicators; overlay rendering is pending. |
+| Highway AI | Hunting | Partial | Records highway-like evidence in loaded chunks. |
+| Highway Divergence Detector | Hunting | Partial | Detects branch/tunnel evidence near highways in loaded blocks. |
+| Hunt Database | Hunting | Working | Provides persistent local JSON storage used by the hunting modules. |
+| Investigation Notes | Hunting | Partial | Stores coordinate notes locally; in-game editing UX is minimal. |
+| Long Distance ESP | Hunting | Partial | Collects targets in loaded range; long-distance visual ESP overlay remains partial. |
+| Multi-Session Intelligence Engine | Hunting | Partial | Combines persisted evidence across sessions; predictions need further validation. |
+| Player Activity Heatmap | Hunting | Partial | Records loaded player sightings for heatmap data; heatmap overlay is pending. |
+| Portal Database | Hunting | Partial | Records loaded nether portals and timestamps in the hunt database. |
+| Region Scanner | Hunting | Partial | Scores visited regions from database evidence. |
+| Safe Logout Finder | Hunting | Partial | Scores nearby terrain for safer logout candidates; recommendations need validation. |
+| Search Planner | Hunting | Partial | Suggests search areas from existing evidence; no advanced route UI yet. |
+| Shared Hunt Files | Hunting | Partial | Provides safe import/export-oriented database integration. |
+| Sign Database | Hunting | Partial | Saves visible sign locations/text where the client exposes them. |
+| Stash Probability Scanner | Hunting | Partial | Scores storage/utility clusters in loaded blocks. |
+| Terrain Anomaly Finder | Hunting | Partial | Scans loaded terrain for suspicious shapes; visual overlay is pending. |
+| Torch Cluster Finder | Hunting | Partial | Detects suspicious torch clusters in loaded blocks. |
+| Trail Mapper | Hunting | Partial | Records artificial trail evidence over sessions; tracer rendering is pending. |
+| World Heatmap | Hunting | Partial | Builds heatmap-ready data layers; visual overlay is pending. |
+| World History Viewer | Hunting | Partial | Summarizes local historical database records; dedicated viewer UX remains basic. |
 
 ## ClickGUI
 
-The ClickGUI opens with the backslash (`\`) keybind by default, renders module panels above the configured background layer, and avoids the heavy vanilla fullscreen blur. The background selector cycles through `None`, `Light Dim`, `Dark Dim`, and `Blur`; the default is `Light Dim`.
+The ClickGUI opens with the backslash (`\`) keybind by default and now follows the compact legacy `1.12.2` Family Fun Pack layout: black translucent panels, one-pixel accent borders, small category headers, compact module rows, and non-stretched text. The top controls expose the new GUI settings: UI scale, accent color, panel width, compact/roomy mode, layout reset, background mode, and the intelligence dashboard. Module rows include a visible status badge (`Working`, `Partial`, `Place`, or `Unsafe`) so placeholder or unsafe modules are not presented as complete ports.
 
 ## GitHub Actions
 
