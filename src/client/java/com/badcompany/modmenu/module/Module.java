@@ -15,18 +15,25 @@ public abstract class Module {
     private final String description;
     private final Category category;
     private final List<Setting<?>> settings = new ArrayList<>();
+    private final boolean enabledByDefault;
     private boolean enabled;
     private InputUtil.Key keybind = InputUtil.UNKNOWN_KEY;
 
     protected Module(String name, String description, Category category) {
+        this(name, description, category, false);
+    }
+
+    protected Module(String name, String description, Category category, boolean enabledByDefault) {
         this.name = name;
         this.description = description;
         this.category = category;
+        this.enabledByDefault = enabledByDefault;
     }
 
     public final String name() { return name; }
     public final String description() { return description; }
     public final Category category() { return category; }
+    public final boolean enabledByDefault() { return enabledByDefault; }
     public final boolean enabled() { return enabled; }
     public final InputUtil.Key keybind() { return keybind; }
     public final List<Setting<?>> settings() { return Collections.unmodifiableList(settings); }

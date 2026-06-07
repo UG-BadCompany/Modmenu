@@ -87,7 +87,10 @@ public final class ConfigManager {
         }
         for (Module module : moduleManager.modules()) {
             ModuleConfig saved = config.modules.get(module.name());
-            if (saved == null) continue;
+            if (saved == null) {
+                module.setEnabled(module.enabledByDefault());
+                continue;
+            }
             module.setEnabled(saved.enabled);
             if (saved.keybind != null && !saved.keybind.isBlank()) {
                 try {
