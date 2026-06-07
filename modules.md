@@ -16,16 +16,16 @@ Example: use it to search for player heads, excluding mobs heads, or spawners fo
 Modern safe port: prints a local formatting-code legend when a book editing screen opens. A richer edit-screen panel remains future mixin work.
 
 ##### Silent Close
-Do not notify server when closing a container - can be reopened later when trying to open player inventory (or by using ```.reopen```).
+Modern safe stub: tracks handled-screen open/close transitions and remembers the last container title/sync id. It does **not** suppress vanilla close packets on Fabric 1.21.11.
 
 ##### Packets Canceling
-All in title, prevent client from sending/receiving specified network packets.
+Modern safe stub: saves clientbound/serverbound packet filter lists for migration continuity, but does **not** drop protocol traffic without an audited packet hook.
 
 ##### Portal Invulnerability
-Be invulnerable after going through a portal, but you won't be able to move by yourself.
+Modern safe stub: monitors portal contact and dimension transitions while preserving vanilla teleport confirmation and movement packets.
 
 ##### Pig POV
-Pig point of view -  When using portal invulnerability you can use a pig to travel 1x1 tunnels without taking damage. Use this to lower your point of view and see where you are going.
+Modern safe port: when riding a pig, optionally switches to first-person perspective without changing entity dimensions or renderers.
 
 ##### Trace entities teleporting
 Modern safe port: watches loaded client entities inside a configurable radius and prints local chat notices when an entity position jump exceeds the configured teleport threshold.
@@ -40,8 +40,8 @@ Modern safe port: can dismiss the client DeathScreen without automatically sendi
 
 ##### Bowbomb
 
-One-shot & ultra-fast arrows. Can only be shot horizontally though.
+Modern safe stub: detects normal charged bow releases and reports that legacy packet flooding is intentionally disabled.
 
 ##### PumpkinAura
 
-Super strong pumpkin aura for pumpkin pvp on auscpvp.org & 2b2t.org.au
+Modern partial port: uses normal vanilla block interaction to place held pumpkins on legal supports near player targets, with use-key, delay, auto-switch, and bedwars-mode settings. Dedicated render overlay remains pending.
