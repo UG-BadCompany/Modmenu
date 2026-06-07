@@ -74,10 +74,21 @@ public final class ConfigManager {
         panelConfig.expanded = panel.expanded();
     }
 
+    public void cycleGuiBackground() {
+        config = sanitize(config);
+        config.gui.background = GuiBackground.next(config.gui.background).id();
+    }
+
+    public GuiBackground guiBackground() {
+        config = sanitize(config);
+        return GuiBackground.from(config.gui.background);
+    }
+
     private static ClientConfig sanitize(ClientConfig loaded) {
         ClientConfig safe = loaded == null ? new ClientConfig() : loaded;
         if (safe.gui == null) safe.gui = new GuiConfig();
         if (safe.gui.panels == null) safe.gui.panels = new HashMap<>();
+        safe.gui.background = GuiBackground.from(safe.gui.background).id();
         if (safe.modules == null) safe.modules = new HashMap<>();
         return safe;
     }
@@ -170,7 +181,39 @@ public final class ConfigManager {
     }
 
     public static final class GuiConfig {
+        public String background = GuiBackground.LIGHT_DIM.id();
         public Map<String, PanelConfig> panels = new HashMap<>();
+    }
+
+    public enum GuiBackground {
+        NONE("none", "None"),
+        LIGHT_DIM("light_dim", "Light Dim"),
+        DARK_DIM("dark_dim", "Dark Dim"),
+        BLUR("blur", "Blur");
+
+        private final String id;
+        private final String label;
+
+        GuiBackground(String id, String label) {
+            this.id = id;
+            this.label = label;
+        }
+
+        public String id() { return id; }
+        public String label() { return label; }
+
+        public static GuiBackground from(String id) {
+            for (GuiBackground background : values()) {
+                if (background.id.equalsIgnoreCase(String.valueOf(id))) return background;
+            }
+            return LIGHT_DIM;
+        }
+
+        public static GuiBackground next(String id) {
+            GuiBackground current = from(id);
+            GuiBackground[] values = values();
+            return values[(current.ordinal() + 1) % values.length];
+        }
     }
 
     public static final class PanelConfig {

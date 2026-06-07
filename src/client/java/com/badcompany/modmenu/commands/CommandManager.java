@@ -3,6 +3,7 @@ package com.badcompany.modmenu.commands;
 import com.badcompany.modmenu.BadCompanyClient;
 import com.badcompany.modmenu.module.Module;
 import com.badcompany.modmenu.module.ModuleManager;
+import com.badcompany.modmenu.module.modules.ClientCommandsModule;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
@@ -15,7 +16,6 @@ import java.util.Locale;
 import java.util.Optional;
 
 public final class CommandManager {
-    public static final String PREFIX = ".";
     private final List<Command> commands = new ArrayList<>();
     private final ModuleManager modules;
 
@@ -25,10 +25,12 @@ public final class CommandManager {
     }
 
     public boolean handleChat(String message) {
-        if (message == null || !message.startsWith(PREFIX)) return true;
-        String body = message.substring(PREFIX.length()).trim();
+        ClientCommandsModule commandModule = commandModule();
+        String prefix = commandModule.prefix();
+        if (!commandModule.enabled() || message == null || !message.startsWith(prefix)) return true;
+        String body = message.substring(prefix.length()).trim();
         if (body.isEmpty()) {
-            feedback("Type .help for commands.");
+            feedback("Type " + prefix + "help for commands.");
             return false;
         }
         List<String> parts = new ArrayList<>(Arrays.asList(body.split("\\s+")));
@@ -72,6 +74,14 @@ public final class CommandManager {
             }, () -> feedback("Module not found: " + moduleName));
         }));
         register(new SimpleCommand("config", "Saves the current configuration.", ".config save", args -> { modules.saveSoon(); feedback("Configuration saved."); }));
+    }
+
+    private ClientCommandsModule commandModule() {
+        return modules.modules().stream()
+                .filter(ClientCommandsModule.class::isInstance)
+                .map(ClientCommandsModule.class::cast)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("FFP Commands module is not registered"));
     }
 
     private void register(Command command) { commands.add(command); }

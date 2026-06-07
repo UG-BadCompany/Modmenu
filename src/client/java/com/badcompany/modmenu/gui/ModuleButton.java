@@ -22,17 +22,18 @@ public final class ModuleButton {
     public void render(DrawContext context, int x, int y, int width, int mouseX, int mouseY) {
         MinecraftClient client = MinecraftClient.getInstance();
         boolean hovered = mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + HEIGHT;
-        int background = module.enabled() ? 0xCC5D44D6 : hovered ? 0xBB2C2C38 : 0xAA202028;
+        int background = module.enabled() ? 0xF05D44D6 : hovered ? 0xF02D2D3A : 0xEA202028;
+        context.fill(x - 1, y, x + width + 1, y + HEIGHT, 0xFF050507);
         context.fill(x, y, x + width, y + HEIGHT, background);
-        context.drawTextWithShadow(client.textRenderer, module.name(), x + 6, y + 5, 0xFFFFFFFF);
+        context.drawTextWithShadow(client.textRenderer, module.name(), x + 6, y + 5, module.enabled() ? 0xFFFFFFFF : 0xFFF1F1F1);
         context.drawTextWithShadow(client.textRenderer, expanded ? "−" : "+", x + width - 12, y + 5, 0xFFE0E0E0);
         if (expanded) {
             int settingY = y + HEIGHT;
             for (Setting<?> setting : module.settings()) {
-                context.fill(x + 4, settingY, x + width - 4, settingY + 13, 0x9021212A);
+                context.fill(x + 4, settingY, x + width - 4, settingY + 13, 0xE021212A);
                 String value = setting.name() + ": " + displayValue(setting);
-                if (value.length() > 30) value = value.substring(0, 27) + "...";
-                context.drawTextWithShadow(client.textRenderer, Text.literal(value), x + 8, settingY + 3, 0xFFCCCCCC);
+                if (value.length() > 34) value = value.substring(0, 31) + "...";
+                context.drawTextWithShadow(client.textRenderer, Text.literal(value), x + 8, settingY + 3, 0xFFE7E7E7);
                 settingY += 14;
             }
         }

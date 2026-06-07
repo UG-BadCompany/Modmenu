@@ -4,7 +4,9 @@ import com.badcompany.modmenu.config.ConfigManager;
 import com.badcompany.modmenu.module.modules.AdvancedSearchModule;
 import com.badcompany.modmenu.module.modules.BookFormattingModule;
 import com.badcompany.modmenu.module.modules.BowbombModule;
+import com.badcompany.modmenu.module.modules.ClientCommandsModule;
 import com.badcompany.modmenu.module.modules.EntityTraceModule;
+import com.badcompany.modmenu.module.modules.IgnorePlayersModule;
 import com.badcompany.modmenu.module.modules.PacketCancelerModule;
 import com.badcompany.modmenu.module.modules.PigPovModule;
 import com.badcompany.modmenu.module.modules.PortalInvulnerabilityModule;
@@ -40,6 +42,8 @@ public final class ModuleManager {
         register(new TrueDurabilityModule());
         register(new AdvancedSearchModule());
         register(new BookFormattingModule());
+        register(new ClientCommandsModule());
+        register(new IgnorePlayersModule());
         register(new SilentCloseModule());
         register(new PacketCancelerModule());
         register(new PortalInvulnerabilityModule());
