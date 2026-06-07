@@ -10,10 +10,18 @@ public final class ColorSetting extends Setting<Integer> {
     }
 
     public void cycle() {
+        cycleBy(1);
+    }
+
+    public void reverseCycle() {
+        cycleBy(-1);
+    }
+
+    private void cycleBy(int direction) {
         int current = get() == null ? PRESETS[0] : get();
         for (int i = 0; i < PRESETS.length; i++) {
             if (PRESETS[i] == current) {
-                set(PRESETS[(i + 1) % PRESETS.length]);
+                set(PRESETS[Math.floorMod(i + direction, PRESETS.length)]);
                 return;
             }
         }

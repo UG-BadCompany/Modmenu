@@ -14,18 +14,18 @@ import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public final class ClickGuiScreen extends Screen {
-    private static final int LEGACY_X = 12;
-    private static final int LEGACY_Y = 12;
-    private static final int CONTROL_HEIGHT = 13;
-    private static final int LEGACY_PANEL_WIDTH = 126;
-    private static final int LEGACY_PANEL_HEIGHT = 176;
+    private static final int EDGE = 10;
+    private static final int TOP_BAR_HEIGHT = 28;
+    private static final int NAV_GAP = 5;
+    private static final int BUTTON_HEIGHT = 14;
     private final ModuleManager moduleManager;
     private final ConfigManager configManager;
     private final List<CategoryPanel> panels = new ArrayList<>();
-    private final List<ControlButton> controls = new ArrayList<>();
+    private final List<NavButton> navButtons = new ArrayList<>();
     private TextFieldWidget searchBox;
     private long openedAt;
 
@@ -38,88 +38,99 @@ public final class ClickGuiScreen extends Screen {
     @Override
     protected void init() {
         panels.clear();
-        int panelWidth = Math.max(104, (int) Math.round(configManager.panelWidth() * configManager.guiScale()));
-        int x = LEGACY_X;
-        int y = 48;
-        for (Category category : Category.values()) {
+        int panelWidth = scaledPanelWidth();
+        int headerBottom = topBarBottom();
+        int usableWidth = Math.max(panelWidth, width - EDGE * 2);
+        int columns = Math.max(1, Math.min(3, (usableWidth + NAV_GAP) / (panelWidth + NAV_GAP)));
+        int[] columnHeights = new int[columns];
+        int startX = EDGE;
+        if (columns > 1) startX = Math.max(EDGE, (width - (columns * panelWidth + (columns - 1) * NAV_GAP)) / 2);
+
+        for (Category category : orderedCategories()) {
             if (moduleManager.modules(category).isEmpty()) continue;
+            int column = shortestColumn(columnHeights);
+            int x = startX + column * (panelWidth + NAV_GAP);
+            int y = headerBottom + columnHeights[column];
             CategoryPanel panel = new CategoryPanel(category, moduleManager.modules(category), x, y);
             ConfigManager.PanelConfig saved = configManager.config().gui.panels.get(category.name());
-            panel.apply(saved);
-            panels.add(panel);
-            x += panelWidth + 6;
-            if (x > width - panelWidth - 6) {
-                x = LEGACY_X;
-                y += LEGACY_PANEL_HEIGHT + 6;
+            if (saved == null || !saved.userPlaced) {
+                panel.setPosition(x, y);
+            } else {
+                panel.apply(saved);
             }
+            panel.clampTo(width, height, configManager, topBarBottom());
+            panels.add(panel);
+            columnHeights[column] += panel.defaultStackHeight(configManager) + NAV_GAP;
         }
-        searchBox = new TextFieldWidget(textRenderer, LEGACY_X + 4, 33, Math.min(LEGACY_PANEL_WIDTH - 8, width - 24), 12, Text.literal("Search modules"));
-        searchBox.setPlaceholder(Text.literal("Search..."));
-        searchBox.setMaxLength(64);
-        rebuildControls();
+
+        createTopNavigation();
         openedAt = System.currentTimeMillis();
     }
 
-    private void rebuildControls() {
-        controls.clear();
-        int x = LEGACY_X + LEGACY_PANEL_WIDTH + 6;
-        int y = LEGACY_Y + 4;
-        x = addControl(x, y, 54, "Scale " + trimScale(configManager.guiScale()), () -> configManager.cycleGuiScale());
-        x = addControl(x, y, 42, "Font", () -> configManager.cycleFontScale());
-        x = addControl(x, y, 54, "Row " + configManager.rowHeight(), () -> configManager.cycleRowHeight());
-        x = addControl(x, y, 58, "Width " + configManager.panelWidth(), () -> configManager.cyclePanelWidth());
-        x = addControl(x, y, 46, "Accent", () -> configManager.cycleAccentColor());
-        x = addControl(x, y, 44, "Border", () -> configManager.cycleBorderColor());
-        x = addControl(x, y, 46, "Header", () -> configManager.cycleHeaderColor());
-        x = addControl(x, y, 46, "On", () -> configManager.cycleEnabledColor());
-        x = addControl(x, y, 46, "Off", () -> configManager.cycleDisabledColor());
-        x = addControl(x, y, 54, "Alpha", () -> configManager.cycleBackgroundOpacity());
-        x = addControl(x, y, 52, configManager.compactMode() ? "Compact" : "Roomy", () -> configManager.toggleCompactMode());
-        x = addControl(x, y, 42, "Reset", () -> { configManager.resetGuiLayout(); init(); });
-        x = addControl(x, y, 60, "BG " + configManager.guiBackground().label(), () -> configManager.cycleGuiBackground());
-        addControl(x, y, 42, "Intel", () -> MinecraftClient.getInstance().setScreen(new IntelligenceDashboardScreen(this)));
+    private void createTopNavigation() {
+        navButtons.clear();
+        int left = EDGE + 118;
+        int right = width - EDGE;
+        int searchWidth = Math.max(80, Math.min(170, right - left - 445));
+        int searchX = Math.max(left, right - 445 - searchWidth);
+        searchBox = new TextFieldWidget(textRenderer, searchX, EDGE + 8, searchWidth, 12, Text.literal("Search modules"));
+        searchBox.setPlaceholder(Text.literal("Search"));
+        searchBox.setMaxLength(64);
+
+        int x = searchX + searchWidth + NAV_GAP;
+        x = addNavButton(x, 62, "Scale " + trimScale(configManager.guiScale()), () -> { configManager.cycleGuiScale(); init(); });
+        x = addNavButton(x, 70, "Theme " + configManager.theme().label(), () -> { configManager.cycleTheme(); init(); });
+        x = addNavButton(x, 64, "Profile " + configManager.activeProfile(), () -> configManager.cycleProfile());
+        x = addNavButton(x, 74, "Reset Layout", () -> { configManager.resetGuiLayout(); init(); });
+        x = addNavButton(x, 54, "HUD", () -> MinecraftClient.getInstance().setScreen(new HudEditorScreen(this, configManager)));
+        addNavButton(x, 56, "Intel", () -> MinecraftClient.getInstance().setScreen(new IntelligenceDashboardScreen(this)));
     }
 
-    private int addControl(int x, int y, int buttonWidth, String label, Runnable action) {
-        if (x + buttonWidth > width - 8) {
-            x = LEGACY_X + LEGACY_PANEL_WIDTH + 6;
-            y += CONTROL_HEIGHT + 3;
-        }
-        controls.add(new ControlButton(x, y, buttonWidth, label, action));
-        return x + buttonWidth + 4;
+    private int addNavButton(int x, int buttonWidth, String label, Runnable action) {
+        if (x + buttonWidth > width - EDGE) return x;
+        navButtons.add(new NavButton(x, EDGE + 7, buttonWidth, label, action));
+        return x + buttonWidth + NAV_GAP;
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        float animation = Math.min(1.0F, (System.currentTimeMillis() - openedAt) / 120.0F);
+        float animation = Math.min(1.0F, (System.currentTimeMillis() - openedAt) / 140.0F);
         renderConfiguredBackground(context, animation);
-        renderLegacyHeader(context);
+        renderTopBar(context, mouseX, mouseY);
         searchBox.render(context, mouseX, mouseY, delta);
-        for (ControlButton control : controls) control.render(context, mouseX, mouseY);
+        for (NavButton control : navButtons) control.render(context, mouseX, mouseY);
+
+        List<CategoryPanel> sorted = panels.stream()
+                .sorted(Comparator.comparing(CategoryPanel::dragging))
+                .toList();
         String search = searchBox.getText();
-        for (CategoryPanel panel : panels) {
-            panel.render(context, mouseX, mouseY, search, height, configManager);
+        for (CategoryPanel panel : sorted) {
+            panel.render(context, mouseX, mouseY, search, height, configManager, topBarBottom());
         }
         super.render(context, mouseX, mouseY, delta);
     }
 
-    private void renderLegacyHeader(DrawContext context) {
-        int headerWidth = Math.min(width - 24, LEGACY_PANEL_WIDTH);
-        context.fill(LEGACY_X, LEGACY_Y, LEGACY_X + headerWidth, 47, (configManager.backgroundOpacity() << 24));
-        drawBorder(context, LEGACY_X, LEGACY_Y, headerWidth, 35, configManager.borderColor());
-        context.drawText(textRenderer, "Family Fun Pack", LEGACY_X + 33, LEGACY_Y + 6, 0xFFEEEEEE, false);
-        context.drawText(textRenderer, "BadCompany", LEGACY_X + 45, LEGACY_Y + 18, configManager.accentColor(), false);
+    private void renderTopBar(DrawContext context, int mouseX, int mouseY) {
+        int background = alpha(configManager.backgroundColor(), Math.min(245, configManager.backgroundOpacity() + 45));
+        context.fill(EDGE, EDGE, width - EDGE, EDGE + TOP_BAR_HEIGHT, background);
+        drawBorder(context, EDGE, EDGE, width - EDGE * 2, TOP_BAR_HEIGHT, configManager.borderColor());
+        context.fill(EDGE + 1, EDGE + 1, width - EDGE - 1, EDGE + 2, configManager.accentColor());
+        context.drawText(textRenderer, "BadCompany", EDGE + 8, EDGE + 6, configManager.textColor(), false);
+        context.drawText(textRenderer, "utility client", EDGE + 8, EDGE + 17, configManager.disabledModuleColor(), false);
+        if (mouseY < topBarBottom()) {
+            context.drawText(textRenderer, "drag panels • right-click modules for settings • scroll panels", EDGE + 4, topBarBottom() - 9, configManager.disabledModuleColor(), false);
+        }
     }
 
     private void renderConfiguredBackground(DrawContext context, float animation) {
         GuiBackground background = configManager.guiBackground();
         int alpha = switch (background) {
             case NONE -> 0;
-            case LIGHT_DIM -> (int) (Math.min(0x40, configManager.backgroundOpacity() / 4) * animation);
-            case DARK_DIM -> (int) (Math.min(0x90, configManager.backgroundOpacity() / 2) * animation);
-            case BLUR -> (int) (Math.min(0x70, configManager.backgroundOpacity() / 3) * animation);
+            case LIGHT_DIM -> (int) (Math.min(0x45, configManager.backgroundOpacity() / 4) * animation);
+            case DARK_DIM -> (int) (Math.min(0xA0, configManager.backgroundOpacity() / 2) * animation);
+            case BLUR -> (int) (Math.min(0x80, configManager.backgroundOpacity() / 3) * animation);
         };
-        if (alpha > 0) context.fill(0, 0, width, height, (alpha << 24) | 0x000000);
+        if (alpha > 0) context.fill(0, 0, width, height, (alpha << 24));
     }
 
     @Override
@@ -129,30 +140,39 @@ public final class ClickGuiScreen extends Screen {
         int button = click.button();
         if (searchBox.mouseClicked(click, doubled)) return true;
         if (button == 0) {
-            for (ControlButton control : controls) {
+            for (NavButton control : navButtons) {
                 if (control.clicked(mouseX, mouseY)) {
                     control.action.run();
                     configManager.saveSafely();
-                    rebuildControls();
+                    createTopNavigation();
                     return true;
                 }
             }
         }
-        for (CategoryPanel panel : panels) if (panel.mouseClicked(mouseX, mouseY, button, configManager)) return true;
+        for (int i = panels.size() - 1; i >= 0; i--) {
+            CategoryPanel panel = panels.get(i);
+            if (panel.mouseClicked(mouseX, mouseY, button, configManager)) {
+                panels.remove(i);
+                panels.add(panel);
+                return true;
+            }
+        }
         return super.mouseClicked(click, doubled);
     }
 
     @Override
     public boolean mouseReleased(Click click) {
-        panels.forEach(CategoryPanel::mouseReleased);
-        panels.forEach(configManager::rememberPanel);
+        for (CategoryPanel panel : panels) {
+            panel.mouseReleased(configManager, width, height, topBarBottom());
+            configManager.rememberPanel(panel);
+        }
         configManager.saveSafely();
         return super.mouseReleased(click);
     }
 
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double horizontalAmount, double verticalAmount) {
-        for (CategoryPanel panel : panels) if (panel.mouseScrolled(mouseX, mouseY, verticalAmount, configManager)) return true;
+        for (CategoryPanel panel : panels) if (panel.mouseScrolled(mouseX, mouseY, verticalAmount, height, configManager)) return true;
         return super.mouseScrolled(mouseX, mouseY, horizontalAmount, verticalAmount);
     }
 
@@ -178,29 +198,49 @@ public final class ClickGuiScreen extends Screen {
     public boolean shouldPause() { return false; }
 
     @Override
-    public void blur() {
-        // Legacy utility-client GUI: keep the world visible behind the compact panels.
+    public void blur() {}
+
+    private int scaledPanelWidth() {
+        return Math.max(112, (int) Math.round(configManager.panelWidth() * configManager.guiScale()));
     }
 
-    private static void drawBorder(DrawContext context, int x, int y, int width, int height, int color) {
+    private int topBarBottom() {
+        return EDGE + TOP_BAR_HEIGHT + 12;
+    }
+
+    private static List<Category> orderedCategories() {
+        return List.of(Category.COMBAT, Category.MOVEMENT, Category.RENDER, Category.PLAYER, Category.WORLD, Category.MISC, Category.EXPLOIT, Category.HUNTING);
+    }
+
+    private static int shortestColumn(int[] heights) {
+        int column = 0;
+        for (int i = 1; i < heights.length; i++) if (heights[i] < heights[column]) column = i;
+        return column;
+    }
+
+    static void drawBorder(DrawContext context, int x, int y, int width, int height, int color) {
         context.fill(x, y, x + width, y + 1, color);
         context.fill(x, y, x + 1, y + height, color);
         context.fill(x, y + height - 1, x + width, y + height, color);
         context.fill(x + width - 1, y, x + width, y + height, color);
     }
 
+    static int alpha(int argb, int alpha) {
+        return (Math.max(0, Math.min(255, alpha)) << 24) | (argb & 0x00FFFFFF);
+    }
+
     private static String trimScale(double value) {
         return value == Math.rint(value) ? String.valueOf((int) value) : String.format(java.util.Locale.ROOT, "%.2f", value);
     }
 
-    private final class ControlButton {
+    private final class NavButton {
         private final int x;
         private final int y;
         private final int width;
         private final String label;
         private final Runnable action;
 
-        private ControlButton(int x, int y, int width, String label, Runnable action) {
+        private NavButton(int x, int y, int width, String label, Runnable action) {
             this.x = x;
             this.y = y;
             this.width = width;
@@ -210,13 +250,13 @@ public final class ClickGuiScreen extends Screen {
 
         private void render(DrawContext context, int mouseX, int mouseY) {
             boolean hovered = clicked(mouseX, mouseY);
-            context.fill(x, y, x + width, y + CONTROL_HEIGHT, hovered ? 0xCC222222 : 0x99000000);
-            drawBorder(context, x, y, width, CONTROL_HEIGHT, configManager.borderColor());
-            context.drawText(textRenderer, label, x + 3, y + 3, hovered ? configManager.accentColor() : 0xFFEEEEEE, false);
+            context.fill(x, y, x + width, y + BUTTON_HEIGHT, hovered ? alpha(configManager.accentColor(), 80) : alpha(configManager.backgroundColor(), 210));
+            drawBorder(context, x, y, width, BUTTON_HEIGHT, hovered ? configManager.accentColor() : configManager.borderColor());
+            context.drawText(textRenderer, label, x + 4, y + 3, hovered ? configManager.accentColor() : configManager.textColor(), false);
         }
 
         private boolean clicked(double mouseX, double mouseY) {
-            return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + CONTROL_HEIGHT;
+            return mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + BUTTON_HEIGHT;
         }
     }
 }
