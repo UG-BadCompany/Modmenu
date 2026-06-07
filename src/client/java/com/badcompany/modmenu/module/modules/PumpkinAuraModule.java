@@ -6,8 +6,8 @@ import com.badcompany.modmenu.settings.BooleanSetting;
 import com.badcompany.modmenu.settings.ColorSetting;
 import com.badcompany.modmenu.settings.NumberSetting;
 import net.minecraft.block.Blocks;
+import net.minecraft.client.network.AbstractClientPlayerEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
@@ -126,13 +126,13 @@ public final class PumpkinAuraModule extends Module {
     }
 
     private Optional<BlockPos> findCandidate() {
-        List<PlayerEntity> targets = client.world.getPlayers().stream()
+        List<AbstractClientPlayerEntity> targets = client.world.getPlayers().stream()
                 .filter(player -> player != client.player)
                 .filter(Entity::isAlive)
                 .filter(player -> player.distanceTo(client.player) <= targetRange.get())
                 .sorted(Comparator.comparingDouble(player -> player.squaredDistanceTo(client.player)))
                 .toList();
-        for (PlayerEntity target : targets) {
+        for (AbstractClientPlayerEntity target : targets) {
             Optional<BlockPos> candidate = positionsAround(target.getBlockPos(), (int) Math.round(placeRange.get())).stream()
                     .filter(this::canPlacePumpkinOn)
                     .min(Comparator.comparingInt(pos -> pos.getManhattanDistance(target.getBlockPos())));
