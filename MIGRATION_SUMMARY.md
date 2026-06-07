@@ -2,7 +2,7 @@
 
 ## Migration Completed
 
-BadCompany now targets Minecraft `1.21.11` on Fabric Loader `0.19.3` with Java 21. The active code path is a Fabric client mod built with Fabric Loom and Yarn mappings. Historical Forge/MCP sources are retained only under `legacy/` for reference and are excluded from compilation.
+BadCompany now targets Minecraft `>=1.21.9 <1.22` on Fabric Loader `0.19.3` with Java 21. The active code path is a Fabric client mod built with Fabric Loom and Yarn mappings. The lower bound remains 1.21.9 because the GUI depends on the 1.21.9+ client input event classes rather than the older 1.21.4 screen method signatures. Historical Forge/MCP sources are retained only under `legacy/` for reference and are excluded from compilation.
 
 ## Legacy Systems Removed From Production
 
