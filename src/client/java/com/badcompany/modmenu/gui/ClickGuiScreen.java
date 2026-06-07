@@ -1,12 +1,16 @@
 package com.badcompany.modmenu.gui;
 
 import com.badcompany.modmenu.config.ConfigManager;
+import com.badcompany.modmenu.config.ConfigManager.GuiBackground;
 import com.badcompany.modmenu.module.Category;
 import com.badcompany.modmenu.module.ModuleManager;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.client.input.CharInput;
+import net.minecraft.client.input.KeyInput;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
@@ -18,6 +22,9 @@ public final class ClickGuiScreen extends Screen {
     private final List<CategoryPanel> panels = new ArrayList<>();
     private TextFieldWidget searchBox;
     private long openedAt;
+    private int backgroundButtonX;
+    private int backgroundButtonY;
+    private int backgroundButtonWidth;
 
     public ClickGuiScreen(ModuleManager moduleManager, ConfigManager configManager) {
         super(Text.literal("BadCompany"));
@@ -42,15 +49,18 @@ public final class ClickGuiScreen extends Screen {
         searchBox = new TextFieldWidget(textRenderer, 12, 12, Math.min(220, width - 24), 18, Text.literal("Search modules"));
         searchBox.setPlaceholder(Text.literal("Search..."));
         searchBox.setMaxLength(64);
+        backgroundButtonWidth = 142;
+        backgroundButtonX = Math.max(12, width - backgroundButtonWidth - 12);
+        backgroundButtonY = 12;
         openedAt = System.currentTimeMillis();
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         float animation = Math.min(1.0F, (System.currentTimeMillis() - openedAt) / 140.0F);
-        int alpha = (int) (0xAA * animation) << 24;
-        context.fill(0, 0, width, height, alpha | 0x08080D);
-        context.drawTextWithShadow(textRenderer, "BadCompany", 12, 32, 0xFFFFFFFF);
+        renderConfiguredBackground(context, animation);
+        context.drawTextWithShadow(textRenderer, "BadCompany", 12, 34, 0xFFFFFFFF);
+        renderBackgroundButton(context);
         searchBox.render(context, mouseX, mouseY, delta);
         String search = searchBox.getText();
         for (CategoryPanel panel : panels) {
@@ -59,19 +69,45 @@ public final class ClickGuiScreen extends Screen {
         super.render(context, mouseX, mouseY, delta);
     }
 
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        if (searchBox.mouseClicked(mouseX, mouseY, button)) return true;
-        for (CategoryPanel panel : panels) if (panel.mouseClicked(mouseX, mouseY, button)) return true;
-        return super.mouseClicked(mouseX, mouseY, button);
+    private void renderConfiguredBackground(DrawContext context, float animation) {
+        GuiBackground background = configManager.guiBackground();
+        int alpha = switch (background) {
+            case NONE -> 0;
+            case LIGHT_DIM -> (int) (0x35 * animation);
+            case DARK_DIM -> (int) (0x72 * animation);
+            case BLUR -> (int) (0x4C * animation);
+        };
+        if (alpha > 0) context.fill(0, 0, width, height, (alpha << 24) | 0x050509);
+    }
+
+    private void renderBackgroundButton(DrawContext context) {
+        String label = "Background: " + configManager.guiBackground().label();
+        context.fill(backgroundButtonX, backgroundButtonY, backgroundButtonX + backgroundButtonWidth, backgroundButtonY + 18, 0xEE17171E);
+        context.fill(backgroundButtonX, backgroundButtonY + 16, backgroundButtonX + backgroundButtonWidth, backgroundButtonY + 18, 0xFF7C4DFF);
+        context.drawTextWithShadow(textRenderer, label, backgroundButtonX + 6, backgroundButtonY + 5, 0xFFFFFFFF);
     }
 
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+        int button = click.button();
+        if (searchBox.mouseClicked(click, doubled)) return true;
+        if (button == 0 && mouseX >= backgroundButtonX && mouseX <= backgroundButtonX + backgroundButtonWidth && mouseY >= backgroundButtonY && mouseY <= backgroundButtonY + 18) {
+            configManager.cycleGuiBackground();
+            configManager.saveSafely();
+            return true;
+        }
+        for (CategoryPanel panel : panels) if (panel.mouseClicked(mouseX, mouseY, button)) return true;
+        return super.mouseClicked(click, doubled);
+    }
+
+    @Override
+    public boolean mouseReleased(Click click) {
         panels.forEach(CategoryPanel::mouseReleased);
         panels.forEach(configManager::rememberPanel);
         configManager.saveSafely();
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(click);
     }
 
     @Override
@@ -81,14 +117,14 @@ public final class ClickGuiScreen extends Screen {
     }
 
     @Override
-    public boolean charTyped(char chr, int modifiers) {
-        return searchBox.charTyped(chr, modifiers) || super.charTyped(chr, modifiers);
+    public boolean charTyped(CharInput input) {
+        return searchBox.charTyped(input) || super.charTyped(input);
     }
 
     @Override
-    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
-        if (searchBox.keyPressed(keyCode, scanCode, modifiers)) return true;
-        return super.keyPressed(keyCode, scanCode, modifiers);
+    public boolean keyPressed(KeyInput input) {
+        if (searchBox.keyPressed(input)) return true;
+        return super.keyPressed(input);
     }
 
     @Override
@@ -101,5 +137,10 @@ public final class ClickGuiScreen extends Screen {
     @Override
     public boolean shouldPause() {
         return false;
+    }
+
+    @Override
+    public void blur() {
+        // Utility-client GUI: keep the world crisp behind the panels unless the user selects a dim mode.
     }
 }

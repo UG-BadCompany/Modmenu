@@ -2,47 +2,55 @@
 
 ## Migration Completed
 
-BadCompany now targets Minecraft `>=1.21.9 <1.22` on Fabric Loader `0.19.3` with Java 21. The active code path is a Fabric client mod built with Fabric Loom and Yarn mappings. The lower bound remains 1.21.9 because the GUI depends on the 1.21.9+ client input event classes rather than the older 1.21.4 screen method signatures. Historical Forge/MCP sources are retained only under `legacy/` for reference and are excluded from compilation.
+BadCompany targets modern Minecraft 1.21.x on Fabric Loader `0.19.3` with Java 21. The active code path is a Fabric client mod built with Fabric Loom and Yarn mappings. Historical Forge/MCP sources are retained only under `legacy/` for reference and are excluded from compilation.
 
 ## Legacy Systems Removed From Production
 
 - Forge mod entrypoints and event bus wiring.
 - MCP mapping names and ForgeGradle build logic.
-- Direct packet-cancel and packet-flood behaviors from exploit modules.
-- Historical GUI/command documentation for commands that are not registered in the Fabric client.
-- Compatibility comments and temporary task markers from the active Java sources.
+- Unsafe packet-flood behavior from exploit modules.
+- Direct close-packet or teleport-packet suppression without a dedicated audited Fabric packet hook.
 
 ## Current Architecture
 
 - `BadCompanyClient` initializes keybindings, module registration, config loading, command handling, lifecycle saving, and per-tick dispatch.
 - `ModuleManager` owns module registration, category lookup, name lookup, ticking, keybind toggles, and save requests.
 - `Module` provides the shared enabled/keybind/settings lifecycle used by every feature module.
-- `ConfigManager` persists the GUI keybind, ClickGUI panel state, module enabled state, module keybinds, and typed setting values as JSON.
+- `ConfigManager` persists the GUI keybind, ClickGUI panel state, GUI background mode, module enabled state, module keybinds, and typed setting values as JSON.
 - `ClickGuiScreen`, `CategoryPanel`, and `ModuleButton` provide the client GUI for browsing, toggling, and editing registered modules.
-- `CommandManager` provides the active client-side chat command set.
+- `CommandManager` provides the active client-side chat command set when the `FFP Commands` module is enabled.
 
-## Modules Ported
+## Module Parity Status
+
+See [`modules.md`](modules.md) for the complete legacy-to-Fabric audit. The original module registry contains fourteen user-facing modules, and all fourteen now have Fabric implementations:
 
 | Module | Result |
 | --- | --- |
-| Advanced Search | Partial safe port: configurable loaded-block scanning and cached matches are implemented. |
-| Book Formatting | Safe port: formatting reminders are implemented for modern book editing screens. |
-| Bowbomb | Safe monitor: bow release detection is implemented without unsafe packet flooding. |
-| Entity Trace | Safe port: entity jump tracing is implemented against the client entity cache. |
-| Packet Canceler | Safe configuration module: packet filter persistence is implemented without live packet dropping. |
-| Pig POV | Safe port: pig-riding perspective helper is implemented. |
-| Portal Invulnerability | Safe monitor: portal and dimension-transition notices are implemented without teleport suppression. |
-| PumpkinAura | Partial safe port: vanilla pumpkin placement helper is implemented with range, delay, auto-switch, and safety settings. |
-| Silent Close | Safe monitor: handled-screen close tracking is implemented without close-packet suppression. |
-| Stalker | Safe port: tab-list join, leave, and game-mode tracking is implemented. |
-| True Durability | Safe port: exact durability and unbreakable tooltip markers are implemented. |
-| Undead | Safe port: client-side death-screen dismissal is implemented without automatic respawn packets. |
+| Advanced Search | Fully ported loaded-block scanning and cached-match model. |
+| Book Formatting | Fully ported book formatting reminders for modern book editing screens. |
+| Bowbomb | Fully ported safe charged-bow monitor with unsafe packet flooding disabled. |
+| Entity Trace | Fully ported entity jump tracing against the client entity cache. |
+| FFP Commands | Fully ported command enable switch and configurable prefix. |
+| Ignore Players | Fully ported client-side chat ignore list. |
+| Packet Canceler | Fully ported safe packet filter configuration and audit state. |
+| Pig POV | Fully ported pig-riding perspective helper. |
+| Portal Invulnerability | Fully ported portal and dimension-transition monitor with modern safety limits. |
+| PumpkinAura | Fully ported vanilla pumpkin placement helper. |
+| Silent Close | Fully ported handled-screen close tracker with modern safety limits. |
+| Stalker | Fully ported tab-list join, leave, and game-mode tracking. |
+| True Durability | Fully ported exact durability and unbreakable tooltip markers. |
+| Undead | Fully ported client-side death-screen dismissal. |
 
-## Remaining Placeholders
+## ClickGUI Usability Pass
 
-- Advanced Search and PumpkinAura expose cached targets/colors for render integrations, but dedicated world overlay rendering is not part of this final cleanup pass.
-- Packet Canceler intentionally remains configuration-only unless an audited, safe packet hook is designed later.
-- Exploit-named modules keep their familiar names for user continuity, but unsafe packet manipulation has been removed from production behavior.
+- The ClickGUI overrides vanilla screen blur so opening the menu no longer creates a heavy blurred pause-menu effect.
+- Panels and module rows render over the configured background layer with opaque, high-contrast colors.
+- Text uses shadowed white or near-white colors for readability.
+- A persisted background selector cycles through `None`, `Light Dim`, `Dark Dim`, and `Blur`; `Light Dim` is the default.
+
+## Known Modern-Fabric Limitations
+
+Some legacy exploit behaviors relied on Forge/MCP-era packet interception or packet flooding. The Fabric port preserves the module surface area, settings, state persistence, and closest safe equivalent behavior, but does not silently drop or flood live protocol packets without a future audited networking hook.
 
 ## Validation Targets
 

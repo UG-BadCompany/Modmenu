@@ -12,7 +12,7 @@ import java.util.Locale;
 
 public final class CategoryPanel {
     private static final int HEADER_HEIGHT = 22;
-    private static final int WIDTH = 138;
+    private static final int WIDTH = 154;
     private final Category category;
     private final List<ModuleButton> buttons = new ArrayList<>();
     private int x;
@@ -22,6 +22,7 @@ public final class CategoryPanel {
     private int dragX;
     private int dragY;
     private int scroll;
+    private String lastSearch = "";
 
     public CategoryPanel(Category category, List<Module> modules, int x, int y) {
         this.category = category;
@@ -44,13 +45,15 @@ public final class CategoryPanel {
 
     public void render(DrawContext context, int mouseX, int mouseY, String search, int screenHeight) {
         MinecraftClient client = MinecraftClient.getInstance();
+        lastSearch = search == null ? "" : search;
         if (dragging) {
             x = mouseX - dragX;
             y = mouseY - dragY;
         }
         x = Math.max(4, Math.min(x, Math.max(4, MinecraftClient.getInstance().getWindow().getScaledWidth() - WIDTH - 4)));
         y = Math.max(4, Math.min(y, Math.max(4, screenHeight - HEADER_HEIGHT - 4)));
-        context.fill(x, y, x + WIDTH, y + HEADER_HEIGHT, 0xEE17171E);
+        context.fill(x - 1, y - 1, x + WIDTH + 1, y + HEADER_HEIGHT + 1, 0xFF050507);
+        context.fill(x, y, x + WIDTH, y + HEADER_HEIGHT, 0xF21A1A22);
         context.fill(x, y + HEADER_HEIGHT - 2, x + WIDTH, y + HEADER_HEIGHT, 0xFF7C4DFF);
         context.drawTextWithShadow(client.textRenderer, category.name(), x + 7, y + 7, 0xFFFFFFFF);
         context.drawTextWithShadow(client.textRenderer, expanded ? "▾" : "▸", x + WIDTH - 14, y + 7, 0xFFFFFFFF);
@@ -80,6 +83,7 @@ public final class CategoryPanel {
         if (!expanded) return false;
         int currentY = y + HEADER_HEIGHT + scroll;
         for (ModuleButton moduleButton : buttons) {
+            if (!matches(moduleButton, lastSearch)) continue;
             int h = moduleButton.fullHeight() + 2;
             if (mouseY >= currentY && mouseY <= currentY + h) return moduleButton.mouseClicked((int) mouseY - currentY, button);
             currentY += h;

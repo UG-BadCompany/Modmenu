@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,7 @@ import java.util.Set;
 public final class BadCompanyClient implements ClientModInitializer {
     public static final String MOD_ID = "badcompany";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    private static final String KEY_CATEGORY = "key.category.badcompany";
+    private static final KeyBinding.Category KEY_CATEGORY = KeyBinding.Category.create(Identifier.of(MOD_ID, "keys"));
     public static KeyBinding OPEN_GUI_KEY;
 
     private static final ModuleManager MODULES = new ModuleManager();
@@ -69,7 +70,7 @@ public final class BadCompanyClient implements ClientModInitializer {
         for (Module module : MODULES.modules()) {
             InputUtil.Key key = module.keybind();
             if (key == null || key == InputUtil.UNKNOWN_KEY || key.getCategory() != InputUtil.Type.KEYSYM) continue;
-            boolean down = InputUtil.isKeyPressed(client.getWindow().getHandle(), key.getCode());
+            boolean down = InputUtil.isKeyPressed(client.getWindow(), key.getCode());
             if (down && pressedModuleKeys.add(key)) {
                 MODULES.handleKey(key);
             } else if (!down) {
