@@ -2,8 +2,12 @@ package com.badcompany.modmenu.module;
 
 import com.badcompany.modmenu.config.ConfigManager;
 import com.badcompany.modmenu.module.modules.AdvancedSearchModule;
+import com.badcompany.modmenu.module.modules.BookFormattingModule;
+import com.badcompany.modmenu.module.modules.EntityTraceModule;
 import com.badcompany.modmenu.module.modules.PlaceholderModule;
+import com.badcompany.modmenu.module.modules.StalkerModule;
 import com.badcompany.modmenu.module.modules.TrueDurabilityModule;
+import com.badcompany.modmenu.module.modules.UndeadModule;
 import net.minecraft.client.util.InputUtil;
 
 import java.util.ArrayList;
@@ -27,14 +31,14 @@ public final class ModuleManager {
     public void registerDefaults() {
         register(new TrueDurabilityModule());
         register(new AdvancedSearchModule());
-        register(new PlaceholderModule("Book Formatting", "Modern book text formatting helpers.", Category.PLAYER, "Book edit screen integration is staged for a focused mixin."));
+        register(new BookFormattingModule());
         register(new PlaceholderModule("Silent Close", "Closes selected screens without sending legacy close packets.", Category.EXPLOIT, "Packet behavior changed in 1.21; implementation is intentionally safe."));
         register(new PlaceholderModule("Packet Canceler", "Selective client packet cancellation.", Category.EXPLOIT, "Requires packet-specific Fabric mixins before enabling live cancellation."));
         register(new PlaceholderModule("Portal Invulnerability", "Legacy portal damage exploit recreation.", Category.EXPLOIT, "Known legacy exploit is patched on modern servers."));
         register(new PlaceholderModule("Pig POV", "Camera utilities inspired by the original Pig POV feature.", Category.RENDER, "Camera transform hooks are staged for future mixin work."));
-        register(new PlaceholderModule("Entity Trace", "Draws tracers to selected entities.", Category.RENDER, "World rendering implementation is stubbed to preserve stability."));
-        register(new PlaceholderModule("Stalker", "Tracks selected players client-side.", Category.PLAYER, "Player tracking state exists; network/GUI selectors are pending."));
-        register(new PlaceholderModule("Undead", "Legacy death-state utility behavior.", Category.PLAYER, "Modern respawn flow differs and needs safe server checks."));
+        register(new EntityTraceModule());
+        register(new StalkerModule());
+        register(new UndeadModule());
         register(new PlaceholderModule("Bowbomb", "Legacy projectile exploit placeholder.", Category.EXPLOIT, "Exploit packet flood is not implemented to avoid unsafe behavior."));
         register(new PlaceholderModule("PumpkinAura", "Automatically places pumpkins when rules allow.", Category.WORLD, "Placement automation needs anti-desync logic before activation."));
         modules.sort(Comparator.comparing(Module::name));

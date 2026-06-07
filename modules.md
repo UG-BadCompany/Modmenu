@@ -13,7 +13,7 @@ Advanced options allow to filter by block states and specify color & tracer opti
 Example: use it to search for player heads, excluding mobs heads, or spawners for specific mob.
 
 ##### Book formatting
-Adds a new panel to the book editing gui, to be able to add colours and special formats to book content & title.
+Modern safe port: prints a local formatting-code legend when a book editing screen opens. A richer edit-screen panel remains future mixin work.
 
 ##### Silent Close
 Do not notify server when closing a container - can be reopened later when trying to open player inventory (or by using ```.reopen```).
@@ -28,19 +28,15 @@ Be invulnerable after going through a portal, but you won't be able to move by y
 Pig point of view -  When using portal invulnerability you can use a pig to travel 1x1 tunnels without taking damage. Use this to lower your point of view and see where you are going.
 
 ##### Trace entities teleporting
-Print new coordinates of entities teleporting out of render distance in chat.
+Modern safe port: watches loaded client entities inside a configurable radius and prints local chat notices when an entity position jump exceeds the configured teleport threshold.
 
 Example: trace dogs tp.
 
 ##### Stalker
-Stalk a player: Notify in chat when a certain player connects / disconnects / changes gamemode / speaks in chat.
-
-Manage it with the ```.stalk``` command.
+Modern safe port: watches the client tab-list cache and prints local chat notices for joins, leaves, and game mode changes. Chat-message matching and command-managed watchlists remain future work.
 
 ##### Undead
-Don't display gameover GUI when dead, so you can move around. On vanilla servers you can still interact with the environment while being dead.
-
-Use ```.respawn``` to respawn.
+Modern safe port: can dismiss the client DeathScreen without automatically sending respawn packets, leaving vanilla respawn handling under user control.
 
 ##### Bowbomb
 
