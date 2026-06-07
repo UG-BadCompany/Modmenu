@@ -1,6 +1,7 @@
 package com.badcompany.modmenu.commands;
 
 import com.badcompany.modmenu.BadCompanyClient;
+import com.badcompany.modmenu.hunting.HuntDatabase;
 import com.badcompany.modmenu.module.Module;
 import com.badcompany.modmenu.module.ModuleManager;
 import com.badcompany.modmenu.module.modules.ClientCommandsModule;
@@ -14,6 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.nio.file.Path;
 
 public final class CommandManager {
     private final List<Command> commands = new ArrayList<>();
@@ -74,6 +76,28 @@ public final class CommandManager {
             }, () -> feedback("Module not found: " + moduleName));
         }));
         register(new SimpleCommand("config", "Saves the current configuration.", ".config save", args -> { modules.saveSoon(); feedback("Configuration saved."); }));
+
+        register(new SimpleCommand("hunt", "Search/export/import the persistent hunting intelligence database.", ".hunt <search|export|import|stats> [query|file]", args -> {
+            if (args.isEmpty() || args.getFirst().equalsIgnoreCase("stats")) {
+                HuntDatabase.Data data = HuntDatabase.get().data();
+                feedback("Hunt DB: " + data.players.size() + " players, " + data.portals.size() + " portals, " + data.signs.size() + " signs, " + data.books.size() + " books, " + data.trails.size() + " trails, " + data.stashes.size() + " stashes, " + data.bases.size() + " bases, " + data.chunkChanges.size() + " changes.");
+                return;
+            }
+            String action = args.removeFirst().toLowerCase(Locale.ROOT);
+            if (action.equals("search")) {
+                String query = String.join(" ", args);
+                HuntDatabase.get().search(query, 8).forEach(CommandManager::feedback);
+            } else if (action.equals("export")) {
+                String name = args.isEmpty() ? "hunt-export.json" : args.getFirst();
+                feedback("Exported hunt database to " + HuntDatabase.get().exportSafely(name));
+            } else if (action.equals("import")) {
+                if (args.isEmpty()) { feedback("Usage: .hunt import <path>"); return; }
+                HuntDatabase.get().importSafely(Path.of(args.getFirst()));
+                feedback("Imported hunt database from " + args.getFirst());
+            } else {
+                feedback("Usage: .hunt <search|export|import|stats> [query|file]");
+            }
+        }));
     }
 
     private ClientCommandsModule commandModule() {
