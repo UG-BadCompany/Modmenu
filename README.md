@@ -22,7 +22,7 @@ The default GUI keybind is backslash (`\\`) and can be changed from Minecraft's 
 
 ## Current Migration Status
 
-The Fabric 1.21.x migration is stable: the project has a working Java 21 Gradle/Fabric Loom build path, GitHub Actions build coverage, a runClient smoke workflow, a module framework, JSON config, ClickGUI, and the True Durability port. Advanced Search now has a safe client-side block/state search cache; its settings are persisted in JSON, while deeper box/tracer render pipeline polish remains a follow-up. Legacy features that still require deeper 1.21 packet/rendering hooks remain placeholders until each module is safely ported in its own PR.
+The Fabric 1.21.x migration is stable: the project has a Java 21 Gradle/Fabric Loom build path, GitHub Actions build coverage, a runClient smoke workflow, a module framework, JSON config, and ClickGUI. True Durability and Advanced Search are active ports. Book Formatting, Entity Trace, Stalker, and Undead now use safe 1.21.11 client APIs for local notices, tab-list tracking, entity jump tracking, and death-screen handling. Exploit/network-sensitive modules remain safe placeholders until a direct modern API migration is available.
 
 ## Migration Checklist
 
@@ -42,13 +42,13 @@ The Fabric 1.21.x migration is stable: the project has a working Java 21 Gradle/
 
 - [x] True Durability
 - [x] Advanced Search
-- [ ] Book Formatting
+- [x] Book Formatting
 - [ ] Silent Close
 - [ ] Packet Canceler
 - [ ] Portal Invulnerability
 - [ ] Pig POV
-- [ ] Entity Trace
-- [ ] Stalker
-- [ ] Undead
+- [x] Entity Trace
+- [x] Stalker
+- [x] Undead
 - [ ] Bowbomb
 - [ ] PumpkinAura
