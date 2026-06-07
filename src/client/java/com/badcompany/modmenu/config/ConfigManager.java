@@ -37,9 +37,10 @@ public final class ConfigManager {
             if (Files.exists(configFile)) {
                 try (Reader reader = Files.newBufferedReader(configFile)) {
                     ClientConfig loaded = GSON.fromJson(reader, ClientConfig.class);
-                    config = loaded == null ? new ClientConfig() : loaded;
+                    config = sanitize(loaded);
                 }
             }
+            config = sanitize(config);
             apply(openGuiKey);
         } catch (IOException | RuntimeException ex) {
             BadCompanyClient.LOGGER.warn("Unable to load BadCompany config from {}; defaults will be used", configFile, ex);
@@ -68,6 +69,14 @@ public final class ConfigManager {
         panelConfig.expanded = panel.expanded();
     }
 
+    private static ClientConfig sanitize(ClientConfig loaded) {
+        ClientConfig safe = loaded == null ? new ClientConfig() : loaded;
+        if (safe.gui == null) safe.gui = new GuiConfig();
+        if (safe.gui.panels == null) safe.gui.panels = new HashMap<>();
+        if (safe.modules == null) safe.modules = new HashMap<>();
+        return safe;
+    }
+
     private void apply(KeyBinding openGuiKey) {
         if (config.openGuiKey != null && !config.openGuiKey.isBlank()) {
             try {
@@ -91,6 +100,7 @@ public final class ConfigManager {
     }
 
     private void capture() {
+        config = sanitize(config);
         if (BadCompanyClient.OPEN_GUI_KEY != null) {
             config.openGuiKey = BadCompanyClient.OPEN_GUI_KEY.getBoundKeyTranslationKey();
         }
