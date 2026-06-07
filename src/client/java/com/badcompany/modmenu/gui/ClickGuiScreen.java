@@ -25,6 +25,9 @@ public final class ClickGuiScreen extends Screen {
     private int backgroundButtonX;
     private int backgroundButtonY;
     private int backgroundButtonWidth;
+    private int dashboardButtonX;
+    private int dashboardButtonY;
+    private int dashboardButtonWidth;
 
     public ClickGuiScreen(ModuleManager moduleManager, ConfigManager configManager) {
         super(Text.literal("BadCompany"));
@@ -50,8 +53,11 @@ public final class ClickGuiScreen extends Screen {
         searchBox.setPlaceholder(Text.literal("Search..."));
         searchBox.setMaxLength(64);
         backgroundButtonWidth = 142;
+        dashboardButtonWidth = 162;
         backgroundButtonX = Math.max(12, width - backgroundButtonWidth - 12);
         backgroundButtonY = 12;
+        dashboardButtonX = Math.max(12, backgroundButtonX - dashboardButtonWidth - 8);
+        dashboardButtonY = 12;
         openedAt = System.currentTimeMillis();
     }
 
@@ -61,6 +67,7 @@ public final class ClickGuiScreen extends Screen {
         renderConfiguredBackground(context, animation);
         context.drawTextWithShadow(textRenderer, "BadCompany", 12, 34, 0xFFFFFFFF);
         renderBackgroundButton(context);
+        renderDashboardButton(context);
         searchBox.render(context, mouseX, mouseY, delta);
         String search = searchBox.getText();
         for (CategoryPanel panel : panels) {
@@ -87,6 +94,12 @@ public final class ClickGuiScreen extends Screen {
         context.drawTextWithShadow(textRenderer, label, backgroundButtonX + 6, backgroundButtonY + 5, 0xFFFFFFFF);
     }
 
+    private void renderDashboardButton(DrawContext context) {
+        context.fill(dashboardButtonX, dashboardButtonY, dashboardButtonX + dashboardButtonWidth, dashboardButtonY + 18, 0xEE17171E);
+        context.fill(dashboardButtonX, dashboardButtonY + 16, dashboardButtonX + dashboardButtonWidth, dashboardButtonY + 18, 0xFFFFD166);
+        context.drawTextWithShadow(textRenderer, "Intelligence Dashboard", dashboardButtonX + 6, dashboardButtonY + 5, 0xFFFFFFFF);
+    }
+
     @Override
     public boolean mouseClicked(Click click, boolean doubled) {
         double mouseX = click.x();
@@ -96,6 +109,10 @@ public final class ClickGuiScreen extends Screen {
         if (button == 0 && mouseX >= backgroundButtonX && mouseX <= backgroundButtonX + backgroundButtonWidth && mouseY >= backgroundButtonY && mouseY <= backgroundButtonY + 18) {
             configManager.cycleGuiBackground();
             configManager.saveSafely();
+            return true;
+        }
+        if (button == 0 && mouseX >= dashboardButtonX && mouseX <= dashboardButtonX + dashboardButtonWidth && mouseY >= dashboardButtonY && mouseY <= dashboardButtonY + 18) {
+            MinecraftClient.getInstance().setScreen(new IntelligenceDashboardScreen(this));
             return true;
         }
         for (CategoryPanel panel : panels) if (panel.mouseClicked(mouseX, mouseY, button)) return true;
